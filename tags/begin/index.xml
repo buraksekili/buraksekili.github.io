@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>begin on ~/Desktop/burak</title>
+    <link>https://buraksekili.github.io/tags/begin/</link>
+    <description>Recent content in begin on ~/Desktop/burak</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>Burak Sekili | [Hugo Cactus Theme](https://github.com/monkeyWzr/hugo-theme-cactus)</copyright>
+    <lastBuildDate>Fri, 01 Oct 2021 21:54:10 +0300</lastBuildDate>
+    
+	<atom:link href="https://buraksekili.github.io/tags/begin/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Notes to myself?</title>
+      <link>https://buraksekili.github.io/posts/new/</link>
+      <pubDate>Fri, 01 Oct 2021 21:54:10 +0300</pubDate>
+      
+      <guid>https://buraksekili.github.io/posts/new/</guid>
+      <description>I&amp;rsquo;ve always wanted to write something on a regular basis. It helps me to clear my mind. Maybe, this blog pushes me to write some posts.</description>
+    </item>
+    
+  </channel>
+</rss>

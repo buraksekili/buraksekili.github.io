@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on ~/Desktop/burak</title>
+    <link>https://buraksekili.github.io/posts/</link>
+    <description>Recent content in Posts on ~/Desktop/burak</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>Burak Sekili | [Hugo Cactus Theme](https://github.com/monkeyWzr/hugo-theme-cactus)</copyright>
+    <lastBuildDate>Mon, 04 Oct 2021 22:33:11 +0300</lastBuildDate>
+    
+	<atom:link href="https://buraksekili.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>K8s Journey 1</title>
+      <link>https://buraksekili.github.io/posts/k8s-journey-1/</link>
+      <pubDate>Mon, 04 Oct 2021 22:33:11 +0300</pubDate>
+      
+      <guid>https://buraksekili.github.io/posts/k8s-journey-1/</guid>
+      <description>Pods  Even though the pods might contain multiple containers, all are running on a single worker node; so, it doesn&amp;rsquo;t work on multiple worker nodes.
+ Resources   Even you have multiple containers within a pod, each container shares the same IP address, port space, and Linux namespaces. So, be careful about port conflicts within a pod. But different pods do not have such a problem, since containers in a pod run in the same Network, not pods in a worker node.</description>
+    </item>
+    
+    <item>
+      <title>Notes to myself?</title>
+      <link>https://buraksekili.github.io/posts/new/</link>
+      <pubDate>Fri, 01 Oct 2021 21:54:10 +0300</pubDate>
+      
+      <guid>https://buraksekili.github.io/posts/new/</guid>
+      <description>I&amp;rsquo;ve always wanted to write something on a regular basis. It helps me to clear my mind. Maybe, this blog pushes me to write some posts.</description>
+    </item>
+    
+  </channel>
+</rss>
