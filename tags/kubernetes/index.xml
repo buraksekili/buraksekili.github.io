@@ -18,8 +18,8 @@
       <pubDate>Mon, 04 Oct 2021 22:33:11 +0300</pubDate>
       
       <guid>https://buraksekili.github.io/posts/k8s-journey-1/</guid>
-      <description>Pods  Even though the pods might contain multiple containers, all are running on a single worker node; so, it doesn&amp;rsquo;t work on multiple worker nodes.
- Resources   Even you have multiple containers within a pod, each container shares the same IP address, port space, and Linux namespaces. So, be careful about port conflicts within a pod. But different pods do not have such a problem, since containers in a pod run in the same Network, not pods in a worker node.</description>
+      <description>I&amp;rsquo;ve just started to learn Kubernetes concepts. Here are notes that I might want to look at them later on. Keep in mind that I do not assert these notes to be complete, exact, precise, or correct. If you see any mistake, please reach out to me.
+ Pods Even though the pods might contain multiple containers, all are running on a single worker node; so, it doesn&amp;rsquo;t work on multiple worker nodes.</description>
     </item>
     
   </channel>

@@ -1,0 +1,7 @@
+.content > h2{
+    color: #2bbc8a;
+}
+
+.content > h2::before {
+    content: none !important;
+}

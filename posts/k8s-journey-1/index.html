@@ -25,8 +25,8 @@ For my open-source projects, you can check *[github.com/buraksekili](https://git
   <meta name="robots" content="all,follow">
   <meta name="googlebot" content="index,follow,snippet,archive">
   <meta property="og:title" content="K8s Journey 1" />
-<meta property="og:description" content="Pods  Even though the pods might contain multiple containers, all are running on a single worker node; so, it doesn&rsquo;t work on multiple worker nodes.
- Resources   Even you have multiple containers within a pod, each container shares the same IP address, port space, and Linux namespaces. So, be careful about port conflicts within a pod. But different pods do not have such a problem, since containers in a pod run in the same Network, not pods in a worker node." />
+<meta property="og:description" content="I&rsquo;ve just started to learn Kubernetes concepts. Here are notes that I might want to look at them later on. Keep in mind that I do not assert these notes to be complete, exact, precise, or correct. If you see any mistake, please reach out to me.
+ Pods Even though the pods might contain multiple containers, all are running on a single worker node; so, it doesn&rsquo;t work on multiple worker nodes." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://buraksekili.github.io/posts/k8s-journey-1/" />
 <meta property="article:published_time" content="2021-10-04T22:33:11+03:00" />
@@ -34,8 +34,8 @@ For my open-source projects, you can check *[github.com/buraksekili](https://git
 
   <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="K8s Journey 1"/>
-<meta name="twitter:description" content="Pods  Even though the pods might contain multiple containers, all are running on a single worker node; so, it doesn&rsquo;t work on multiple worker nodes.
- Resources   Even you have multiple containers within a pod, each container shares the same IP address, port space, and Linux namespaces. So, be careful about port conflicts within a pod. But different pods do not have such a problem, since containers in a pod run in the same Network, not pods in a worker node."/>
+<meta name="twitter:description" content="I&rsquo;ve just started to learn Kubernetes concepts. Here are notes that I might want to look at them later on. Keep in mind that I do not assert these notes to be complete, exact, precise, or correct. If you see any mistake, please reach out to me.
+ Pods Even though the pods might contain multiple containers, all are running on a single worker node; so, it doesn&rsquo;t work on multiple worker nodes."/>
 
   
   
@@ -45,7 +45,7 @@ For my open-source projects, you can check *[github.com/buraksekili](https://git
   <link rel="stylesheet" href="https://buraksekili.github.io/css/styles.94f653e9e151e28067a7c5dbbc4600cbd5a3c721e79faaf971e523c40f3b249b8e4f20bb57810dfffa8d559ca5c140fd56eb4cd9c0853113ad08e66afdb08bdd.css" integrity="sha512-lPZT6eFR4oBnp8XbvEYAy9WjxyHnn6r5ceUjxA87JJuOTyC7V4EN//qNVZylwUD9VutM2cCFMROtCOZq/bCL3Q=="> 
 
   
-  
+   <link rel="stylesheet" href="https://buraksekili.github.io/css/custom.css"> 
   
     <!--[if lt IE 9]>
       <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
@@ -151,7 +151,7 @@ For my open-source projects, you can check *[github.com/buraksekili](https://git
     </a>
   </li>
   <li>
-    <a class="icon" href="http://www.tumblr.com/share/link?url=https%3a%2f%2fburaksekili.github.io%2fposts%2fk8s-journey-1%2f&name=K8s%20Journey%201&description=Pods%20%20Even%20though%20the%20pods%20might%20contain%20multiple%20containers%2c%20all%20are%20running%20on%20a%20single%20worker%20node%3b%20so%2c%20it%20doesn%26rsquo%3bt%20work%20on%20multiple%20worker%20nodes.%0a%20Resources%20%20%20Even%20you%20have%20multiple%20containers%20within%20a%20pod%2c%20each%20container%20shares%20the%20same%20IP%20address%2c%20port%20space%2c%20and%20Linux%20namespaces.%20So%2c%20be%20careful%20about%20port%20conflicts%20within%20a%20pod.%20But%20different%20pods%20do%20not%20have%20such%20a%20problem%2c%20since%20containers%20in%20a%20pod%20run%20in%20the%20same%20Network%2c%20not%20pods%20in%20a%20worker%20node." aria-label="Tumblr">
+    <a class="icon" href="http://www.tumblr.com/share/link?url=https%3a%2f%2fburaksekili.github.io%2fposts%2fk8s-journey-1%2f&name=K8s%20Journey%201&description=I%26rsquo%3bve%20just%20started%20to%20learn%20Kubernetes%20concepts.%20Here%20are%20notes%20that%20I%20might%20want%20to%20look%20at%20them%20later%20on.%20Keep%20in%20mind%20that%20I%20do%20not%20assert%20these%20notes%20to%20be%20complete%2c%20exact%2c%20precise%2c%20or%20correct.%20If%20you%20see%20any%20mistake%2c%20please%20reach%20out%20to%20me.%0a%20Pods%20Even%20though%20the%20pods%20might%20contain%20multiple%20containers%2c%20all%20are%20running%20on%20a%20single%20worker%20node%3b%20so%2c%20it%20doesn%26rsquo%3bt%20work%20on%20multiple%20worker%20nodes." aria-label="Tumblr">
       <i class="fab fa-tumblr " aria-hidden="true"></i>
     </a>
   </li>
@@ -205,22 +205,25 @@ For my open-source projects, you can check *[github.com/buraksekili](https://git
     
     <div id="toc">
       <nav id="TableOfContents">
-  <ul>
+  <ol>
     <li><a href="#pods">Pods</a>
-      <ul>
+      <ol>
         <li><a href="#resources">Resources</a></li>
-      </ul>
+        <li><a href="#pods-with-multiple-containers-organization-of-containers">Pods with multiple containers? Organization of containers</a></li>
+      </ol>
     </li>
-  </ul>
+  </ol>
 </nav>
     </div>
     
     <div class="content" itemprop="articleBody">
-      <h2 id="pods">Pods</h2>
-<blockquote>
-<p>Even though the pods might contain multiple containers, all are running on a single worker node; so, it doesn&rsquo;t work on multiple worker nodes.</p>
+      <blockquote>
+<p>I&rsquo;ve just started to learn Kubernetes concepts. Here are notes that I might want to look at them later on. Keep in mind that I do not assert these notes to be complete, exact, precise, or correct. If you see any mistake, please reach out to me.</p>
 </blockquote>
-<h3 id="resources">Resources</h3>
+<h1 id="pods">Pods</h1>
+<p>Even though the pods might contain multiple containers, all are running on a single worker node; so, it doesn&rsquo;t work on multiple worker nodes.</p>
+<p>Pods are basic units of scaling in k8s, so instead of scaling containers individually, k8s scales pods.</p>
+<h2 id="resources">Resources</h2>
 <ol>
 <li>
 <p>Even you have multiple containers within a pod, each container shares the same IP address, port space, and Linux namespaces. So, be careful about port conflicts within a pod. But different pods do not have such a problem, since containers in a pod run in the same Network, not pods in a worker node.</p>
@@ -228,6 +231,19 @@ For my open-source projects, you can check *[github.com/buraksekili](https://git
 <li>
 <p>For local file system I/O, you probably do not have a common filesystem because most containers run upon different file systems. You can use <code>volumes</code> to share a common file system.</p>
 </li>
+<li>
+<p>Pods in a k8s cluster share <code>network address space</code>, so each pod is able to access other pods through IP address.</p>
+<ul>
+<li>Since pods in a cluster share <code>network address space</code>, there is no need for network address translation (<code>NAT</code>).</li>
+</ul>
+</li>
+</ol>
+<h2 id="pods-with-multiple-containers-organization-of-containers">Pods with multiple containers? Organization of containers</h2>
+<p>You probably might want to split your application into multiple containers (e.g., domain specific containers, email services, notification services). So, you might ask following questions to yourself to decide on whether you need to put multiple containers in a pod.</p>
+<ol>
+<li>Can you scale them together?</li>
+<li>Do they construct single entity?</li>
+<li>Can you run together (tightly-coupled manner)?</li>
 </ol>
 
     </div>
@@ -300,7 +316,7 @@ For my open-source projects, you can check *[github.com/buraksekili](https://git
     </a>
   </li>
   <li>
-    <a class="icon" href="http://www.tumblr.com/share/link?url=https%3a%2f%2fburaksekili.github.io%2fposts%2fk8s-journey-1%2f&name=K8s%20Journey%201&description=Pods%20%20Even%20though%20the%20pods%20might%20contain%20multiple%20containers%2c%20all%20are%20running%20on%20a%20single%20worker%20node%3b%20so%2c%20it%20doesn%26rsquo%3bt%20work%20on%20multiple%20worker%20nodes.%0a%20Resources%20%20%20Even%20you%20have%20multiple%20containers%20within%20a%20pod%2c%20each%20container%20shares%20the%20same%20IP%20address%2c%20port%20space%2c%20and%20Linux%20namespaces.%20So%2c%20be%20careful%20about%20port%20conflicts%20within%20a%20pod.%20But%20different%20pods%20do%20not%20have%20such%20a%20problem%2c%20since%20containers%20in%20a%20pod%20run%20in%20the%20same%20Network%2c%20not%20pods%20in%20a%20worker%20node." aria-label="Tumblr">
+    <a class="icon" href="http://www.tumblr.com/share/link?url=https%3a%2f%2fburaksekili.github.io%2fposts%2fk8s-journey-1%2f&name=K8s%20Journey%201&description=I%26rsquo%3bve%20just%20started%20to%20learn%20Kubernetes%20concepts.%20Here%20are%20notes%20that%20I%20might%20want%20to%20look%20at%20them%20later%20on.%20Keep%20in%20mind%20that%20I%20do%20not%20assert%20these%20notes%20to%20be%20complete%2c%20exact%2c%20precise%2c%20or%20correct.%20If%20you%20see%20any%20mistake%2c%20please%20reach%20out%20to%20me.%0a%20Pods%20Even%20though%20the%20pods%20might%20contain%20multiple%20containers%2c%20all%20are%20running%20on%20a%20single%20worker%20node%3b%20so%2c%20it%20doesn%26rsquo%3bt%20work%20on%20multiple%20worker%20nodes." aria-label="Tumblr">
       <i class="fab fa-tumblr fa-lg" aria-hidden="true"></i>
     </a>
   </li>
