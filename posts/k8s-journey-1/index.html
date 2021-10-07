@@ -25,8 +25,8 @@ For my open-source projects, you can check *[github.com/buraksekili](https://git
   <meta name="robots" content="all,follow">
   <meta name="googlebot" content="index,follow,snippet,archive">
   <meta property="og:title" content="K8s Journey 1" />
-<meta property="og:description" content="I’ve just started to learn Kubernetes concepts. Here are notes that I might want to look at them later on. Keep in mind that I do not assert these notes to be complete, exact, precise, or correct. Also, although I am not an expert or used k8s on a daily basis, I have some prior experience with k8s. If you see any mistakes, please reach out to me.
- Pods Even though the pods might contain multiple containers, all are running on a single worker node; so, it doesn&rsquo;t work on multiple worker nodes." />
+<meta property="og:description" content="Pods  Even though the pods might contain multiple containers, all are running on a single worker node; so, it doesn&rsquo;t work on multiple worker nodes.
+ Resources   Even you have multiple containers within a pod, each container shares the same IP address, port space, and Linux namespaces. So, be careful about port conflicts within a pod. But different pods do not have such a problem, since containers in a pod run in the same Network, not pods in a worker node." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://buraksekili.github.io/posts/k8s-journey-1/" />
 <meta property="article:published_time" content="2021-10-04T22:33:11+03:00" />
@@ -34,8 +34,8 @@ For my open-source projects, you can check *[github.com/buraksekili](https://git
 
   <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="K8s Journey 1"/>
-<meta name="twitter:description" content="I’ve just started to learn Kubernetes concepts. Here are notes that I might want to look at them later on. Keep in mind that I do not assert these notes to be complete, exact, precise, or correct. Also, although I am not an expert or used k8s on a daily basis, I have some prior experience with k8s. If you see any mistakes, please reach out to me.
- Pods Even though the pods might contain multiple containers, all are running on a single worker node; so, it doesn&rsquo;t work on multiple worker nodes."/>
+<meta name="twitter:description" content="Pods  Even though the pods might contain multiple containers, all are running on a single worker node; so, it doesn&rsquo;t work on multiple worker nodes.
+ Resources   Even you have multiple containers within a pod, each container shares the same IP address, port space, and Linux namespaces. So, be careful about port conflicts within a pod. But different pods do not have such a problem, since containers in a pod run in the same Network, not pods in a worker node."/>
 
   
   
@@ -151,7 +151,7 @@ For my open-source projects, you can check *[github.com/buraksekili](https://git
     </a>
   </li>
   <li>
-    <a class="icon" href="http://www.tumblr.com/share/link?url=https%3a%2f%2fburaksekili.github.io%2fposts%2fk8s-journey-1%2f&name=K8s%20Journey%201&description=I%e2%80%99ve%20just%20started%20to%20learn%20Kubernetes%20concepts.%20Here%20are%20notes%20that%20I%20might%20want%20to%20look%20at%20them%20later%20on.%20Keep%20in%20mind%20that%20I%20do%20not%20assert%20these%20notes%20to%20be%20complete%2c%20exact%2c%20precise%2c%20or%20correct.%20Also%2c%20although%20I%20am%20not%20an%20expert%20or%20used%20k8s%20on%20a%20daily%20basis%2c%20I%20have%20some%20prior%20experience%20with%20k8s.%20If%20you%20see%20any%20mistakes%2c%20please%20reach%20out%20to%20me.%0a%20Pods%20Even%20though%20the%20pods%20might%20contain%20multiple%20containers%2c%20all%20are%20running%20on%20a%20single%20worker%20node%3b%20so%2c%20it%20doesn%26rsquo%3bt%20work%20on%20multiple%20worker%20nodes." aria-label="Tumblr">
+    <a class="icon" href="http://www.tumblr.com/share/link?url=https%3a%2f%2fburaksekili.github.io%2fposts%2fk8s-journey-1%2f&name=K8s%20Journey%201&description=Pods%20%20Even%20though%20the%20pods%20might%20contain%20multiple%20containers%2c%20all%20are%20running%20on%20a%20single%20worker%20node%3b%20so%2c%20it%20doesn%26rsquo%3bt%20work%20on%20multiple%20worker%20nodes.%0a%20Resources%20%20%20Even%20you%20have%20multiple%20containers%20within%20a%20pod%2c%20each%20container%20shares%20the%20same%20IP%20address%2c%20port%20space%2c%20and%20Linux%20namespaces.%20So%2c%20be%20careful%20about%20port%20conflicts%20within%20a%20pod.%20But%20different%20pods%20do%20not%20have%20such%20a%20problem%2c%20since%20containers%20in%20a%20pod%20run%20in%20the%20same%20Network%2c%20not%20pods%20in%20a%20worker%20node." aria-label="Tumblr">
       <i class="fab fa-tumblr " aria-hidden="true"></i>
     </a>
   </li>
@@ -185,7 +185,7 @@ For my open-source projects, you can check *[github.com/buraksekili](https://git
         <div class="article-read-time">
           <i class="far fa-clock"></i>
           
-          3 minute read
+          1 minute read
         </div>
         
         
@@ -209,8 +209,6 @@ For my open-source projects, you can check *[github.com/buraksekili](https://git
     <li><a href="#pods">Pods</a>
       <ol>
         <li><a href="#resources">Resources</a></li>
-        <li><a href="#pods-with-multiple-containers-organization-of-containers">Pods with multiple containers? Organization of containers</a></li>
-        <li><a href="#creating-pods-yaml">Creating pods? YAML</a></li>
       </ol>
     </li>
   </ol>
@@ -218,12 +216,10 @@ For my open-source projects, you can check *[github.com/buraksekili](https://git
     </div>
     
     <div class="content" itemprop="articleBody">
-      <blockquote>
-<p>I’ve just started to learn Kubernetes concepts. Here are notes that I might want to look at them later on. Keep in mind that I do not assert these notes to be complete, exact, precise, or correct. Also, although I am not an expert or used k8s on a daily basis, I have some prior experience with k8s. If you see any mistakes, please reach out to me.</p>
-</blockquote>
-<h1 id="pods">Pods</h1>
+      <h1 id="pods">Pods</h1>
+<blockquote>
 <p>Even though the pods might contain multiple containers, all are running on a single worker node; so, it doesn&rsquo;t work on multiple worker nodes.</p>
-<p>Pods are basic units of scaling in k8s, so instead of scaling containers individually, k8s scales pods.</p>
+</blockquote>
 <h2 id="resources">Resources</h2>
 <ol>
 <li>
@@ -234,148 +230,10 @@ For my open-source projects, you can check *[github.com/buraksekili](https://git
 </li>
 <li>
 <p>Pods in a k8s cluster share <code>network address space</code>, so each pod is able to access other pods through IP address.</p>
-<ul>
-<li>Since pods in a cluster share <code>network address space</code>, there is no need for network address translation (<code>NAT</code>).</li>
-</ul>
+<p>3.1  Since pods in a cluster share <code>network address space</code>, there is no need for network address translation (<code>NAT</code>).</p>
+<p>3.2</p>
 </li>
 </ol>
-<h2 id="pods-with-multiple-containers-organization-of-containers">Pods with multiple containers? Organization of containers</h2>
-<p>You probably might want to split your application into multiple containers (e.g., domain-specific containers, email services, notification services). So, you might ask the following questions to yourself to decide on whether you need to put multiple containers in a pod.</p>
-<ol>
-<li>Can you scale them together?</li>
-<li>Do they construct a single entity?</li>
-<li>Can you run together (tightly coupled manner)?</li>
-</ol>
-<h2 id="creating-pods-yaml">Creating pods? YAML</h2>
-<p>To simply put, you just create a YAML or JSON manifests (YAML is a common way of defining pods) and send them REST API of the k8s (master node). Also, you can use <code>kubectl</code> for creating a pod but in general, you will need to define a YAML file to describe various pod attributes.</p>
-<div class="highlight"><div style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4">
-<table style="border-spacing:0;padding:0;margin:0;border:0;width:auto;overflow:auto;display:block;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
-<pre style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 1
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 2
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 3
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 4
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 5
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 6
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 7
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 8
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f"> 9
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">10
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">11
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">12
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">13
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">14
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">15
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">16
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">17
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">18
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">19
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">20
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">21
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">22
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">23
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">24
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">25
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">26
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">27
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">28
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">29
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">30
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">31
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">32
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">33
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">34
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">35
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">36
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">37
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">38
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">39
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">40
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">41
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">42
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">43
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">44
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">45
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">46
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">47
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">48
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">49
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">50
-</span><span style="margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#7f7f7f">51
-</span></code></pre></td>
-<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
-<pre style="color:#f8f8f2;background-color:#282a36;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#ff79c6">apiVersion</span>: v1
-<span style="color:#ff79c6">kind</span>: Pod
-<span style="color:#ff79c6">metadata</span>:
-  <span style="color:#ff79c6">name</span>: example
-<span style="color:#ff79c6">spec</span>:
-  <span style="color:#ff79c6">containers</span>:
-    - <span style="color:#ff79c6">name</span>: busybox
-      <span style="color:#ff79c6">image</span>: busybox:<span style="color:#bd93f9">1.25</span>
-      <span style="color:#ff79c6">volumeMounts</span>:
-        - <span style="color:#ff79c6">name</span>: quobytevolume
-          <span style="color:#ff79c6">mountPath</span>: /persistent
-      <span style="color:#ff79c6">command</span>:
-        - /bin/sh
-        - -ec
-        - <span style="color:#f1fa8c">|
-</span><span style="color:#f1fa8c">          if [ -f /persistent/log ]; then</span>
-            echo -n <span style="color:#f1fa8c">&#34;Found old state starting at &#34;</span>; head -n1 /persistent/log
-          else
-            echo -n <span style="color:#f1fa8c">&#34;Starting with a fresh state&#34;</span>
-          fi
-          while sleep <span style="color:#bd93f9">5</span>; do date | tee -a /persistent/log; done
-  <span style="color:#ff79c6">volumes</span>:
-  - <span style="color:#ff79c6">name</span>: quobytevolume
-    <span style="color:#ff79c6">quobyte</span>:
-      <span style="color:#ff79c6">registry</span>: ignored:<span style="color:#bd93f9">7861</span>
-      <span style="color:#ff79c6">volume</span>: testVolume
-      <span style="color:#ff79c6">readOnly</span>: <span style="color:#ff79c6">false</span>
-      <span style="color:#ff79c6">user</span>: root
-      <span style="color:#ff79c6">group</span>: root
-
-<span style="color:#ff79c6">status</span>:
-    <span style="color:#ff79c6">conditions</span>:
-    - <span style="color:#ff79c6">lastProbeTime</span>: <span style="color:#ff79c6">null</span>
-        <span style="color:#ff79c6">lastTransitionTime</span>: <span style="color:#ff79c6">null</span>
-        <span style="color:#ff79c6">status</span>: <span style="color:#f1fa8c">&#34;True&#34;</span>
-        <span style="color:#ff79c6">type</span>: Ready
-    <span style="color:#ff79c6">containerStatuses</span>:
-    - <span style="color:#ff79c6">containerID</span>: docker://f027sa...
-        <span style="color:#ff79c6">image</span>: your/image
-        <span style="color:#ff79c6">imageID</span>: docker://4c325...
-        <span style="color:#ff79c6">lastState</span>: {}
-        <span style="color:#ff79c6">name</span>: image 
-        <span style="color:#ff79c6">ready</span>: <span style="color:#ff79c6">true</span>
-        <span style="color:#ff79c6">restartCount</span>: <span style="color:#bd93f9">0</span>
-        <span style="color:#ff79c6">state</span>:
-            <span style="color:#ff79c6">running</span>:
-                <span style="color:#ff79c6">startedAt</span>: 2016-03-18T12:46:05Z
-    <span style="color:#ff79c6">hostIP</span>: <span style="color:#f1fa8c">&#34;&lt;hostIP&gt;&#34;</span>
-    <span style="color:#ff79c6">phase</span>: Running
-    <span style="color:#ff79c6">podIP</span>: <span style="color:#f1fa8c">&#34;&lt;podIP&gt;&#34;</span> <span style="color:#6272a4"># &lt;podIP&gt; !== &lt;hostIP&gt;</span>
-    <span style="color:#ff79c6">startTime</span>: 2016-03-18T12:44:32Z 
-</code></pre></td></tr></table>
-</div>
-</div><blockquote>
-<p>YAML from <code>Kubernetes GitHub</code> <sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> and <code>Kubernetes in Action</code> <sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup></p>
-</blockquote>
-<p>There are three major parts of this YAML file:</p>
-<ol>
-<li><strong>Metadata</strong>: As name implies, basic metadata regarding the pod.</li>
-<li><strong>Spec</strong>: Actual description of the pod including <code>containers</code> &amp; <code>volumes</code>.</li>
-<li><strong>Status</strong>: Current health of the pod.</li>
-</ol>
-<section class="footnotes" role="doc-endnotes">
-<hr>
-<ol>
-<li id="fn:1" role="doc-endnote">
-<p><a href="https://github.com/quobyte/kubernetes/blob/master/deploy/example-pod.yaml">https://github.com/quobyte/kubernetes/blob/master/deploy/example-pod.yaml</a> <a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
-</li>
-<li id="fn:2" role="doc-endnote">
-<p><a href="https://www.manning.com/books/kubernetes-in-action">https://www.manning.com/books/kubernetes-in-action</a> <a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
-</li>
-</ol>
-</section>
 
     </div>
   </article>
@@ -447,7 +305,7 @@ For my open-source projects, you can check *[github.com/buraksekili](https://git
     </a>
   </li>
   <li>
-    <a class="icon" href="http://www.tumblr.com/share/link?url=https%3a%2f%2fburaksekili.github.io%2fposts%2fk8s-journey-1%2f&name=K8s%20Journey%201&description=I%e2%80%99ve%20just%20started%20to%20learn%20Kubernetes%20concepts.%20Here%20are%20notes%20that%20I%20might%20want%20to%20look%20at%20them%20later%20on.%20Keep%20in%20mind%20that%20I%20do%20not%20assert%20these%20notes%20to%20be%20complete%2c%20exact%2c%20precise%2c%20or%20correct.%20Also%2c%20although%20I%20am%20not%20an%20expert%20or%20used%20k8s%20on%20a%20daily%20basis%2c%20I%20have%20some%20prior%20experience%20with%20k8s.%20If%20you%20see%20any%20mistakes%2c%20please%20reach%20out%20to%20me.%0a%20Pods%20Even%20though%20the%20pods%20might%20contain%20multiple%20containers%2c%20all%20are%20running%20on%20a%20single%20worker%20node%3b%20so%2c%20it%20doesn%26rsquo%3bt%20work%20on%20multiple%20worker%20nodes." aria-label="Tumblr">
+    <a class="icon" href="http://www.tumblr.com/share/link?url=https%3a%2f%2fburaksekili.github.io%2fposts%2fk8s-journey-1%2f&name=K8s%20Journey%201&description=Pods%20%20Even%20though%20the%20pods%20might%20contain%20multiple%20containers%2c%20all%20are%20running%20on%20a%20single%20worker%20node%3b%20so%2c%20it%20doesn%26rsquo%3bt%20work%20on%20multiple%20worker%20nodes.%0a%20Resources%20%20%20Even%20you%20have%20multiple%20containers%20within%20a%20pod%2c%20each%20container%20shares%20the%20same%20IP%20address%2c%20port%20space%2c%20and%20Linux%20namespaces.%20So%2c%20be%20careful%20about%20port%20conflicts%20within%20a%20pod.%20But%20different%20pods%20do%20not%20have%20such%20a%20problem%2c%20since%20containers%20in%20a%20pod%20run%20in%20the%20same%20Network%2c%20not%20pods%20in%20a%20worker%20node." aria-label="Tumblr">
       <i class="fab fa-tumblr fa-lg" aria-hidden="true"></i>
     </a>
   </li>
