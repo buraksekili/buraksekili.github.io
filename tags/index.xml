@@ -7,10 +7,19 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>Burak Sekili | [Hugo Cactus Theme](https://github.com/monkeyWzr/hugo-theme-cactus)</copyright>
-    <lastBuildDate>Mon, 04 Oct 2021 22:33:11 +0300</lastBuildDate>
+    <lastBuildDate>Fri, 15 Oct 2021 11:59:40 +0300</lastBuildDate>
     
 	<atom:link href="https://buraksekili.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>postgre</title>
+      <link>https://buraksekili.github.io/tags/postgre/</link>
+      <pubDate>Fri, 15 Oct 2021 11:59:40 +0300</pubDate>
+      
+      <guid>https://buraksekili.github.io/tags/postgre/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>kubernetes</title>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>postgre on ~/Desktop/burak</title>
+    <link>https://buraksekili.github.io/tags/postgre/</link>
+    <description>Recent content in postgre on ~/Desktop/burak</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>Burak Sekili | [Hugo Cactus Theme](https://github.com/monkeyWzr/hugo-theme-cactus)</copyright>
+    <lastBuildDate>Fri, 15 Oct 2021 11:59:40 +0300</lastBuildDate>
+    
+	<atom:link href="https://buraksekili.github.io/tags/postgre/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Truncate Issue</title>
+      <link>https://buraksekili.github.io/posts/truncate-issue/</link>
+      <pubDate>Fri, 15 Oct 2021 11:59:40 +0300</pubDate>
+      
+      <guid>https://buraksekili.github.io/posts/truncate-issue/</guid>
+      <description>I was trying to write some integration tests running on PostgreSQL. It seems like TRUNCATE has some issue when it is running on a connection from the pool. Instead, the DELETE command works fine 👌.</description>
+    </item>
+    
+  </channel>
+</rss>
