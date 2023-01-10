@@ -1,0 +1,76 @@
+# baseURL: # if your site is in 'https', then make sure your base url isn't written using 'http' otherwise your sitemap would contain http (as opposeed to https) URLs. This would affect Google indexing of your URLs.
+title: Burak Sekili
+paginate: 5
+theme: charlolamode
+
+menu:
+    main:
+        - name: ""
+          url: /
+        - name: ""
+          url: /
+        - name: ""
+          url: /
+
+params:
+    author: Burak Sekili
+
+    defaultTheme: auto
+    # disableThemeToggle: true
+    ShowShareButtons: true
+    ShowReadingTime: true
+    displayFullLangName: true
+    ShowBreadCrumbs: true
+    ShowCodeCopyButtons: true
+    ShowToc: true
+
+    profileMode:
+        # Disable to populate home page with 'mainSections' content
+        enabled: true
+        title: Burak Sekili
+        description: |
+          Hi there 👋 
+
+            I am Burak, a software engineer working at [Tyk](https://tyk.io/).
+
+            I am interested in distributed systems and developer tooling. 
+            
+            The most of the projects I've worked on can be found on my GitHub page.
+        imageUrl: "/images/profile.png"
+        imageTitle: my image
+        # imageWidth: 120
+        # imageHeight: 120
+        buttons: null
+    mainSections: null
+      
+
+    socialIcons:
+        - name: github
+          url: "https://github.com/buraksekili"
+        - name: linkedin
+          url: "https://www.linkedin.com/in/sekili/"
+
+      # add more social icons. find more in svg.html file
+      # - name: youtube
+      #   url: yoururl
+      # - name: twitter
+      #   url: yoururl
+      # - name: facebook
+      #   url: yoururl
+
+
+    # change favicon in images folder (icon for web tab)
+    assets:
+          favicon: "/images/favicon.ico"
+          favicon16x16: "/images/favicon-16x16.png"
+          favicon32x32: "/images/favicon-32x32.png"
+          apple_touch_icon: "/images/apple-touch-icon.png"
+          safari_pinned_tab: "/images/apple-touch-icon.png"
+
+enableInlineShortcodes: true
+enableRobotsTXT: true
+enableEmoji: true
+pygmentsUseClasses: true
+
+minify:
+    disableXML: true
