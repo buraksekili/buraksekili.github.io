@@ -29,11 +29,10 @@ params:
         enabled: true
         title: Burak Sekili
         description: |
-          Hi there 👋 
 
-            I am Burak, a software engineer working at [Tyk](https://tyk.io/), who is interested in distributed systems and developer tooling. 
+          I am Burak, a software engineer working at [![Tyk](images/tyk-logo.png)](https://tyk.io/), who is interested in distributed systems and developer tooling. 
 
-          At Tyk, I work on
+          At [![Tyk2](images/tyk-logo.png)](https://tyk.io/), I work on
 
             - [Tyk Operator](https://github.com/TykTechnologies/tyk-operator/), Kubernetes Controller managing Tyk resources on Kubernetes.
             - [Tyk Helm Charts](https://github.com/TykTechnologies/tyk-helm-chart/), Helm Charts to deploy Tyk stack on Kubernetes.
