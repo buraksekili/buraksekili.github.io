@@ -31,11 +31,17 @@ params:
         description: |
           Hi there 👋 
 
-            I am Burak, a software engineer working at [Tyk](https://tyk.io/).
+            I am Burak, a software engineer working at [Tyk](https://tyk.io/), who is interested in distributed systems and developer tooling. 
 
-            I am interested in distributed systems and developer tooling. 
-            
-            The most of the projects I've worked on can be found on my GitHub page.
+          At Tyk, I work on
+
+            - [Tyk Operator](https://github.com/TykTechnologies/tyk-operator/), Kubernetes Controller managing Tyk resources on Kubernetes.
+            - [Tyk Helm Charts](https://github.com/TykTechnologies/tyk-helm-chart/), Helm Charts to deploy Tyk stack on Kubernetes.
+            - [Tyk Schemas](https://marketplace.visualstudio.com/items?itemName=TykTechnologiesLimited.tyk-schemas), a VsCode extension providing JSON validation for files used by Tyk products.
+            - Other internal DX projects...
+
+          Find me on 👇
+
         imageUrl: "/images/profile.png"
         imageTitle: my image
         # imageWidth: 120
@@ -49,6 +55,8 @@ params:
           url: "https://github.com/buraksekili"
         - name: linkedin
           url: "https://www.linkedin.com/in/sekili/"
+        - name: twitter
+          url: "https://twitter.com/buraksekili"
 
       # add more social icons. find more in svg.html file
       # - name: youtube
