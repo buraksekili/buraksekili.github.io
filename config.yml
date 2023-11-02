@@ -5,11 +5,11 @@ theme: "PaperMod"
 
 
 menu:
-    main:
-        - name: Articles
-          url: archives/
-        - name: Search
-          url: search/
+    main: []
+        # - name: Articles
+        #   url: archives/
+        # - name: Search
+        #   url: search/
 
 params:
     author: Burak Sekili
