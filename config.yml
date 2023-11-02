@@ -1,16 +1,15 @@
 # baseURL: # if your site is in 'https', then make sure your base url isn't written using 'http' otherwise your sitemap would contain http (as opposeed to https) URLs. This would affect Google indexing of your URLs.
 title: Burak Sekili
 paginate: 5
-theme: charlolamode
+theme: "PaperMod"
+
 
 menu:
     main:
-        - name: ""
-          url: /
-        - name: ""
-          url: /
-        - name: ""
-          url: /
+        - name: Articles
+          url: archives/
+        - name: Search
+          url: search/
 
 params:
     author: Burak Sekili
@@ -19,10 +18,13 @@ params:
     # disableThemeToggle: true
     ShowShareButtons: true
     ShowReadingTime: true
-    displayFullLangName: true
+    ShowPostNavLinks: true
     ShowBreadCrumbs: true
+    ShowAllPagesInArchive: true
+
     ShowCodeCopyButtons: true
     ShowToc: true
+    displayFullLangName: true
 
     profileMode:
         # Disable to populate home page with 'mainSections' content
@@ -34,19 +36,22 @@ params:
 
           At [![Tyk](images/tyk-logo.png)](https://tyk.io/), I work on
 
-            - [Tyk Operator](https://github.com/TykTechnologies/tyk-operator/), Kubernetes Controller managing Tyk resources on Kubernetes.
-            - [Tyk Helm Charts](https://github.com/TykTechnologies/tyk-helm-chart/), Helm Charts to deploy Tyk stack on Kubernetes.
+            - [Tyk Operator](https://github.com/TykTechnologies/tyk-operator/), Kubernetes Operator managing Tyk resources on Kubernetes.
+            - [Tyk Charts](https://github.com/TykTechnologies/tyk-charts/), Helm Charts to deploy Tyk stack on Kubernetes.
+            - [Tyk K8s Bootstrap](https://github.com/TykTechnologies/tyk-k8s-bootstrap/), Helm Chart hooks to bootstrap [tyk-stack](https://github.com/TykTechnologies/tyk-charts/tree/main/tyk-stack) Helm Chart in Kubernetes.
             - [Tyk Schemas](https://marketplace.visualstudio.com/items?itemName=TykTechnologiesLimited.tyk-schemas), a VsCode extension providing JSON validation for files used by Tyk products.
             - Other internal DX projects...
 
           Find me on 👇
 
-        imageUrl: "/images/profile.png"
         imageTitle: my image
         # imageWidth: 120
         # imageHeight: 120
         buttons: null
-    mainSections: null
+
+    mainSections:
+      - archieve
+    #   - articles
       
 
     socialIcons:
@@ -81,3 +86,9 @@ pygmentsUseClasses: true
 
 minify:
     disableXML: true
+    
+outputs:
+    home:
+        - HTML
+        - RSS
+        - JSON
