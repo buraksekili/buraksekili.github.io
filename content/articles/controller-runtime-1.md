@@ -2,6 +2,7 @@
 author: "Burak Sekili"
 title: "Diving into controller-runtime | Manager"
 date: "2023-11-02"
+description: "Introduction to the Manager in `controller-runtime`"
 tags: [
     "Kubernetes",
     "Operator",
