@@ -2,16 +2,16 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>index on Burak Sekili</title>
-    <link>/tags/index/</link>
+    <link>https://buraksekili.github.io/tags/index/</link>
     <description>Recent content in index on Burak Sekili</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en</language><atom:link href="/tags/index/index.xml" rel="self" type="application/rss+xml" />
+    <language>en</language><atom:link href="https://buraksekili.github.io/tags/index/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Articles</title>
-      <link>/articles/</link>
+      <link>https://buraksekili.github.io/articles/</link>
       <pubDate>Thu, 02 Nov 2023 00:00:00 +0000</pubDate>
       
-      <guid>/articles/</guid>
+      <guid>https://buraksekili.github.io/articles/</guid>
       <description></description>
     </item>
     

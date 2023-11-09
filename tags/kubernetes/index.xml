@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Kubernetes on Burak Sekili</title>
-    <link>/tags/kubernetes/</link>
+    <link>https://buraksekili.github.io/tags/kubernetes/</link>
     <description>Recent content in Kubernetes on Burak Sekili</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 02 Nov 2023 00:00:00 +0000</lastBuildDate><atom:link href="/tags/kubernetes/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 02 Nov 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://buraksekili.github.io/tags/kubernetes/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Diving into controller-runtime | Manager</title>
-      <link>/articles/controller-runtime-1/</link>
+      <link>https://buraksekili.github.io/articles/controller-runtime-1/</link>
       <pubDate>Thu, 02 Nov 2023 00:00:00 +0000</pubDate>
       
-      <guid>/articles/controller-runtime-1/</guid>
+      <guid>https://buraksekili.github.io/articles/controller-runtime-1/</guid>
       <description>Introduction to the Manager in `controller-runtime`</description>
     </item>
     
