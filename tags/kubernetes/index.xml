@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>Burak Sekili</title>
-    <link>/</link>
-    <description>Recent content on Burak Sekili</description>
+    <title>Kubernetes on Burak Sekili</title>
+    <link>/tags/kubernetes/</link>
+    <description>Recent content in Kubernetes on Burak Sekili</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 02 Nov 2023 00:00:00 +0000</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 02 Nov 2023 00:00:00 +0000</lastBuildDate><atom:link href="/tags/kubernetes/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Diving into controller-runtime | Manager</title>
       <link>/articles/controller-runtime-1/</link>
@@ -17,8 +17,6 @@
 The increased adoption of projects like Kubebuilder or Operator SDK has facilitated the creation of Kubernetes Operator projects. Users need to implement minimal requirements to start with Kubernetes controllers, thanks to these projects.
 As a developer working on Kubernetes projects, I inevitably touch code pieces utilizing controller-runtime.</description>
     </item>
-    
-    
     
   </channel>
 </rss>
