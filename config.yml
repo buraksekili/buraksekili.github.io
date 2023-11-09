@@ -1,5 +1,5 @@
 #baseURL: # if your site is in 'https', then make sure your base url isn't written using 'http' otherwise your sitemap would contain http (as opposeed to https) URLs. This would affect Google indexing of your URLs.
-baseURL: https://buraksekili.github.io/
+baseURL: "https://buraksekili.github.io/"
 title: Burak Sekili
 paginate: 5
 theme: "PaperMod"
@@ -7,13 +7,14 @@ theme: "PaperMod"
 googleAnalytics: G-M6ZJTX7HVG
 
 menu:
-#    main: []
     main:
       - name: Articles
         url: archives/
       - name: Search
         url: search/
 
+
+enableGitInfo: true
 
 markup:
   goldmark:
