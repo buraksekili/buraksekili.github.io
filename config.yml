@@ -3,87 +3,98 @@ title: Burak Sekili
 paginate: 5
 theme: "PaperMod"
 
-
 menu:
-    main: []
-        # - name: Articles
-        #   url: archives/
-        # - name: Search
-        #   url: search/
+#    main: []
+    main:
+      - name: Articles
+        url: archives/
+      - name: Search
+        url: search/
+
+
+markup:
+  goldmark:
+    renderer:
+      unsafe: true
+  highlight:
+    lineNos: true
+    style: gruvbox
+    tabWidth: 0
 
 params:
-    author: Burak Sekili
+  author: Burak Sekili
 
-    defaultTheme: auto
-    # disableThemeToggle: true
-    ShowShareButtons: true
-    ShowReadingTime: true
-    ShowPostNavLinks: true
-    ShowBreadCrumbs: true
-    ShowAllPagesInArchive: true
+  defaultTheme: auto
+  # disableThemeToggle: true
+  ShowShareButtons: true
+  ShowReadingTime: true
+  ShowPostNavLinks: true
+  ShowBreadCrumbs: true
+  ShowAllPagesInArchive: true
 
-    ShowCodeCopyButtons: true
-    ShowToc: true
-    displayFullLangName: true
+  ShowCodeCopyButtons: true
+  ShowToc: true
+  displayFullLangName: true
 
-    profileMode:
-        # Disable to populate home page with 'mainSections' content
-        enabled: true
-        title: Burak Sekili
-        description: |
+  profileMode:
+      # Disable to populate home page with 'mainSections' content
+      enabled: true
+      title: Burak Sekili
+      description: |
 
-          I am Burak, a software engineer working at [![Tyk](images/tyk-logo.png)](https://tyk.io/), who is interested in distributed systems and developer tooling. 
+        I am Burak, a software engineer working at [![Tyk](images/tyk-logo.png)](https://tyk.io/), who is interested in distributed systems and developer tooling. 
 
-          At [![Tyk](images/tyk-logo.png)](https://tyk.io/), I work on
+        At [![Tyk](images/tyk-logo.png)](https://tyk.io/), I work on
 
-            - [Tyk Operator](https://github.com/TykTechnologies/tyk-operator/), Kubernetes Operator managing Tyk resources on Kubernetes.
-            - [Tyk Charts](https://github.com/TykTechnologies/tyk-charts/), Helm Charts to deploy Tyk stack on Kubernetes.
-            - [Tyk K8s Bootstrap](https://github.com/TykTechnologies/tyk-k8s-bootstrap/), Helm Chart hooks to bootstrap [tyk-stack](https://github.com/TykTechnologies/tyk-charts/tree/main/tyk-stack) Helm Chart in Kubernetes.
-            - [Tyk Schemas](https://marketplace.visualstudio.com/items?itemName=TykTechnologiesLimited.tyk-schemas), a VsCode extension providing JSON validation for files used by Tyk products.
-            - Other internal DX projects...
+          - [Tyk Operator](https://github.com/TykTechnologies/tyk-operator/), Kubernetes Operator managing Tyk resources on Kubernetes.
+          - [Tyk Charts](https://github.com/TykTechnologies/tyk-charts/), Helm Charts to deploy Tyk stack on Kubernetes.
+          - [Tyk K8s Bootstrap](https://github.com/TykTechnologies/tyk-k8s-bootstrap/), Helm Chart hooks to bootstrap [tyk-stack](https://github.com/TykTechnologies/tyk-charts/tree/main/tyk-stack) Helm Chart in Kubernetes.
+          - [Tyk Schemas](https://marketplace.visualstudio.com/items?itemName=TykTechnologiesLimited.tyk-schemas), a VsCode extension providing JSON validation for files used by Tyk products.
+          - Other internal DX projects...
 
-          Find me on 👇
+        Find me on 👇
 
-        imageTitle: my image
-        # imageWidth: 120
-        # imageHeight: 120
-        buttons: null
+      imageTitle: my image
+      # imageWidth: 120
+      # imageHeight: 120
+      buttons: null
 
-    mainSections:
-      - archieve
-    #   - articles
-      
-
-    socialIcons:
-        - name: github
-          url: "https://github.com/buraksekili"
-        - name: linkedin
-          url: "https://www.linkedin.com/in/sekili/"
-        - name: twitter
-          url: "https://twitter.com/buraksekili"
-
-      # add more social icons. find more in svg.html file
-      # - name: youtube
-      #   url: yoururl
-      # - name: twitter
-      #   url: yoururl
-      # - name: facebook
-      #   url: yoururl
+  mainSections:
+    - archieve
+  #   - articles
 
 
-    # change favicon in images folder (icon for web tab)
-    assets:
-          favicon: "/images/favicon.ico"
-          favicon16x16: "/images/favicon-16x16.png"
-          favicon32x32: "/images/favicon-32x32.png"
-          apple_touch_icon: "/images/apple-touch-icon.png"
-          safari_pinned_tab: "/images/apple-touch-icon.png"
+  socialIcons:
+      - name: github
+        url: "https://github.com/buraksekili"
+      - name: linkedin
+        url: "https://www.linkedin.com/in/sekili/"
+      - name: twitter
+        url: "https://twitter.com/buraksekili"
+
+    # add more social icons. find more in svg.html file
+    # - name: youtube
+    #   url: yoururl
+    # - name: twitter
+    #   url: yoururl
+    # - name: facebook
+    #   url: yoururl
+
+
+  # change favicon in images folder (icon for web tab)
+  assets:
+    disableHLJS: true
+    favicon: "/images/favicon.ico"
+    favicon16x16: "/images/favicon-16x16.png"
+    favicon32x32: "/images/favicon-32x32.png"
+    apple_touch_icon: "/images/apple-touch-icon.png"
+    safari_pinned_tab: "/images/apple-touch-icon.png"
 
 enableInlineShortcodes: true
 enableRobotsTXT: true
 enableEmoji: true
 pygmentsUseClasses: true
-
+pygmentsCodeFences: true
 minify:
     disableXML: true
     
