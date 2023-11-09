@@ -3,9 +3,7 @@ title: Burak Sekili
 paginate: 5
 theme: "PaperMod"
 
-services:
-  googleAnalytics:
-    googleAnalytics: G-M6ZJTX7HVG
+googleAnalytics: G-M6ZJTX7HVG
 
 menu:
 #    main: []
@@ -26,6 +24,7 @@ markup:
     tabWidth: 0
 
 params:
+  env: production
   author: Burak Sekili
 
   defaultTheme: auto
