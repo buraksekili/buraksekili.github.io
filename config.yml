@@ -3,6 +3,10 @@ title: Burak Sekili
 paginate: 5
 theme: "PaperMod"
 
+services:
+  googleAnalytics:
+    googleAnalytics: G-M6ZJTX7HVG
+
 menu:
 #    main: []
     main:
