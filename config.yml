@@ -3,7 +3,15 @@ baseURL: "https://buraksekili.github.io/"
 title: Burak Sekili
 paginate: 5
 theme: "PaperMod"
-
+enableGitInfo: true
+enableRobotsTXT: true
+enableInlineShortcodes: true
+buildDrafts: false
+buildFuture: false
+buildExpired: false
+enableEmoji: true
+pygmentsUseClasses: true
+pygmentsCodeFences: true
 googleAnalytics: G-M6ZJTX7HVG
 
 menu:
@@ -13,14 +21,12 @@ menu:
       - name: Search
         url: search/
 
-
-enableGitInfo: true
-
 markup:
   goldmark:
     renderer:
       unsafe: true
   highlight:
+    noClasses: false
     lineNos: true
     style: gruvbox
     tabWidth: 0
@@ -91,11 +97,6 @@ params:
     disableHLJS: true
     disableFingerprinting: false
 
-enableInlineShortcodes: true
-enableRobotsTXT: true
-enableEmoji: true
-pygmentsUseClasses: true
-pygmentsCodeFences: true
 minify:
     disableXML: true
     
