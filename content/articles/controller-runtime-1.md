@@ -109,7 +109,7 @@ oversees one or more controllers that watch the resources (e.g., Pods) of intere
 Each operator requires a Manager to operate, as the Manager controls the controllers, webhooks, metric servers, 
 logs, leader elections, caches, and other components.
 
-> For all dependencies managed by the Manager, please refer to the [Manager interface](https://pkg.go.dev/sigs.k8s.io/controller-runtime/pkg/manager#
+> For all dependencies managed by the Manager, please refer to the [Manager interface](https://pkg.go.dev/sigs.k8s.io/controller-runtime/pkg/manager#)
 
 ## Controller Dependencies 
 
