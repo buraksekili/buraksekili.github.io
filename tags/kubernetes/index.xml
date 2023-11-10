@@ -13,7 +13,7 @@
       <pubDate>Thu, 02 Nov 2023 00:00:00 +0000</pubDate>
       
       <guid>https://buraksekili.github.io/articles/controller-runtime-1/</guid>
-      <description>Introduction to the Manager in `controller-runtime`</description>
+      <description>Introduction to the role of controller-runtime Manager in Kubernetes Operators</description>
     </item>
     
   </channel>
