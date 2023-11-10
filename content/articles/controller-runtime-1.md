@@ -2,7 +2,7 @@
 author: "Burak Sekili"
 title: "Diving into controller-runtime | Manager"
 date: "2023-11-02"
-description: "Introduction to the Manager in `controller-runtime`"
+description: "Introduction to the role of controller-runtime Manager in Kubernetes Operators"
 tags: [
     "Kubernetes",
     "Operator",
@@ -11,24 +11,29 @@ tags: [
 TocOpen: true
 ---
 
+[ctrl]: https://github.com/kubernetes-sigs/controller-runtime
+
 ## Introduction
 
-The `controller-runtime` package has become a fundamental tool for most Kubernetes controllers, simplifying the creation 
-of controllers to manage resources within a Kubernetes environment efficiently. Users tend to prefer it over `client-go`.
+[`controller-runtime`][ctrl] package has become a fundamental tool for 
+most Kubernetes controllers, simplifying the creation 
+of controllers to manage resources within a Kubernetes environment efficiently. Users tend to prefer it over
+[`client-go`](https://github.com/kubernetes/client-go).
 
-The increased adoption of projects like Kubebuilder or Operator SDK has facilitated the creation of Kubernetes Operator projects.
+The increased adoption of projects like [Kubebuilder](https://book.kubebuilder.io/) or [Operator SDK](https://sdk.operatorframework.io/) 
+has facilitated the creation of Kubernetes Operator projects.
 Users need to implement minimal requirements to start with Kubernetes controllers, thanks to these projects.
 
-As a developer working on Kubernetes projects, I inevitably touch code pieces utilizing `controller-runtime`. 
+As a developer working on Kubernetes projects, I inevitably touch code pieces utilizing [`controller-runtime`][ctrl] 
 Whenever I dive into code base, I always learn something new about the underlying mechanism of Kubernetes.
 
-Through this blog series, I aim to share my learning regarding `controller-runtime`, consolidating my notes spread across various notebooks.
+Through this blog series, I aim to share my learning regarding [`controller-runtime`][ctrl] consolidating my notes spread across various notebooks.
 
-This article will specifically delve into the role of `controller-runtime`'s Manager.
+This article will specifically delve into the role of [`controller-runtime`][ctrl] Manager.
 
 ## What are Controllers and Operators?
 
-`controller-runtime` has emerged as the go-to package for building Kubernetes controllers. 
+[`controller-runtime`][ctrl] has emerged as the go-to package for building Kubernetes controllers. 
 However, it is essential to understand what these controllers - or Kubernetes Operators - are.
 
 In Kubernetes, controllers observe resources, such as Deployments, in a control loop to ensure the cluster resources 
@@ -52,11 +57,12 @@ a special architecture to
 - run workers to perform reconciliation on resources picked up from work queue.
 
 This architecture is clearly pictured in `client-go` documentation:
-![client-go-controller-interaction](/images/controller-runtime-1-client-go-controller-interaction.jpeg)
-> reference: *client-go documentation* [^4]
+
+![client-go-controller-interaction](/images/controller-runtime-1-client-go-controller-interaction.jpeg#center)
+<p class="reference">reference: <a href="https://github.com/kubernetes/sample-controller/blob/master/docs/controller-client-go.md"> client-go documentation  </a> </p>
 
 Most end-users typically do not need to interact with the sections outlined in blue in the architecture. 
-The `controller-runtime` effectively manages these elements. The subsequent section will explain these components
+The [`controller-runtime`][ctrl] effectively manages these elements. The subsequent section will explain these components
 in simple terms.
 
 To simply put, controllers use 
@@ -130,29 +136,30 @@ generally not recommended unless there is a compelling reason to do so.
 
 The cache is also shared across controllers, ensuring optimal performance. Consider a scenario where there are *n* controllers 
 observing multiple resources in a cluster. If a separate cache is maintained for each controller, *n* caches will attempt 
-to synchronize with the API Server, increasing the load on API Server. Instead, `controller-runtime` utilizes a shared cache 
+to synchronize with the API Server, increasing the load on API Server. Instead, [`controller-runtime`][ctrl] utilizes a shared cache 
 called [NewSharedIndexInformer](https://pkg.go.dev/k8s.io/client-go@v0.28.3/tools/cache#NewSharedIndexInformer) for all 
 controllers registered within a manager.
 
-![client-go-controller-interaction](/images/controller-runtime-1-controller-cache.png)
+![client-go-controller-interaction](/images/controller-runtime-1-controller-cache.png#center)
 
 In the diagram above, two controllers maintain separate caches where both send `ListAndWatch` requests to API Server. 
-However, `controller-runtime` utilizes a shared cache, reducing the need for multiple `ListAndWatch` operations.
+However, [`controller-runtime`][ctrl] utilizes a shared cache, reducing the need for multiple `ListAndWatch` operations.
 
-![client-go-controller-interaction](/images/controller-runtime-1-newsharedindexinformer.png)
-reference [controller-runtime/pkg/cache/internal/informers.go](https://github.com/kubernetes-sigs/controller-runtime/blob/v0.16.3/pkg/cache/internal/informers.go#L56)
+![client-go-controller-interaction](/images/controller-runtime-1-newsharedindexinformer.png#center)
+<p class="reference">reference: <a href="https://github.com/kubernetes-sigs/controller-runtime/blob/v0.16.3/pkg/cache/internal/informers.go#L56"> controller-runtime/pkg/cache/internal/informers.go  </a> </p>
 
 ## Code
 
-Whether you use Kubebuilder, Operator SDK, or `controller-runtime` directly, operators necessitate a Manager to function.
-The [`NewManager`](https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3#pkg-variables) from `controller-runtime` 
+Whether you use [Kubebuilder](https://book.kubebuilder.io/), 
+[Operator SDK](https://sdk.operatorframework.io/), or [`controller-runtime`][ctrl] directly, operators necessitate a Manager to function.
+The [`NewManager`](https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3#pkg-variables) from [`controller-runtime`][ctrl] 
 facilitates the creation of a new manager.
 
 
 ```go
 var (
-	// Refer to godocs for details
-	// ....
+    // Refer to godocs for details
+    // ....
     // NewManager returns a new Manager for creating Controllers.
     NewManager = manager.New	
 )
@@ -234,7 +241,7 @@ func init() {
 
 I mentioned cache a lot, but it is one of the most crucial piece of operators and controllers, where you can see its effect
 directly.
-As mentioned [Controller Dependencies](#controller-dependencies) section, `controller-runtime` initializes `NewSharedIndexInformer`
+As mentioned [Controller Dependencies](#controller-dependencies) section, [`controller-runtime`][ctrl] initializes `NewSharedIndexInformer`
 for our controllers under the hood. In order to configure cache, [`cache.Options{}`](https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/cache#Options)
 needs to be utilized. There are again a couple of possible configurations possible but be careful while configuring
 your cache since it has an impact on performance and resource consumption of your operator.
@@ -272,7 +279,7 @@ function generates the [`controllerManager`](https://github.com/kubernetes-sigs/
 which implements the [`Runnable`](https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/manager#Runnable) interface.
 
 During the creation of the [`controllerManager`](https://github.com/kubernetes-sigs/controller-runtime/blob/main/pkg/manager/internal.go#L63) 
-structure, `controller-runtime` initializes the [`Cluster`](https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/cluster#Cluster) 
+structure, [`controller-runtime`][ctrl] initializes the [`Cluster`](https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/cluster#Cluster) 
 to handle all necessary operations to interact with your cluster, including managing clients and caches. 
 
 All the settings provided within [`manager.Options{}`](https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/manager#Options)
