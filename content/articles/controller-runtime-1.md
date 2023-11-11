@@ -1,4 +1,7 @@
 ---
+editPost:
+    URL: "https://github.com/buraksekili/buraksekili.github.io/blob/main/content/articles/controller-runtime-1.md"
+    Text: "Edit this page on " # edit text
 author: "Burak Sekili"
 title: "Diving into controller-runtime | Manager"
 date: "2023-11-02"
