@@ -237,6 +237,10 @@ func init() {
 }
 ```
 
+The scheme is responsible for registering the Go type declaration of your Kubernetes object into a GVK. 
+This is significant as `RESTMapper` then translates GVK to GVR, establishing a distinct HTTP path for your Kubernetes 
+resource. Consequently, this empowers the Kubernetes client to know the relevant endpoint for your resource.
+
 
 [//]: # (```go {linenos=table,hl_lines=[2],linenostart=199})
 
