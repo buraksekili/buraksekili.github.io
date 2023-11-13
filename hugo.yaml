@@ -3,24 +3,30 @@ baseURL: "https://buraksekili.github.io/"
 title: Burak Sekili
 paginate: 5
 theme: "PaperMod"
-
+enableGitInfo: true
+enableRobotsTXT: true
+enableInlineShortcodes: true
+buildDrafts: false
+buildFuture: false
+buildExpired: false
+enableEmoji: true
+pygmentsUseClasses: true
+pygmentsCodeFences: true
 googleAnalytics: G-M6ZJTX7HVG
 
 menu:
-    main:
-      - name: Articles
-        url: archives/
-      - name: Search
-        url: search/
-
-
-enableGitInfo: true
+  main:
+    - name: Articles
+      url: archives/
+    - name: Search
+      url: search/
 
 markup:
   goldmark:
     renderer:
       unsafe: true
   highlight:
+    noClasses: false
     lineNos: true
     style: gruvbox
     tabWidth: 0
@@ -42,27 +48,27 @@ params:
   displayFullLangName: true
 
   profileMode:
-      # Disable to populate home page with 'mainSections' content
-      enabled: true
-      title: Burak Sekili
-      description: |
+    # Disable to populate home page with 'mainSections' content
+    enabled: true
+    title: Burak Sekili
+    description: |
+      
+      I am Burak, a software engineer working at [![Tyk](images/tyk-logo.png)](https://tyk.io/), who is interested in distributed systems and developer tooling. 
+      
+      At [![Tyk](images/tyk-logo.png)](https://tyk.io/), I work on
+      
+        - [Tyk Operator](https://github.com/TykTechnologies/tyk-operator/), Kubernetes Operator managing Tyk resources on Kubernetes.
+        - [Tyk Charts](https://github.com/TykTechnologies/tyk-charts/), Helm Charts to deploy Tyk stack on Kubernetes.
+        - [Tyk K8s Bootstrap](https://github.com/TykTechnologies/tyk-k8s-bootstrap/), Helm Chart hooks to bootstrap [tyk-stack](https://github.com/TykTechnologies/tyk-charts/tree/main/tyk-stack) Helm Chart in Kubernetes.
+        - [Tyk Schemas](https://marketplace.visualstudio.com/items?itemName=TykTechnologiesLimited.tyk-schemas), a VsCode extension providing JSON validation for files used by Tyk products.
+        - Other internal DX projects...
+      
+      Find me on 👇
 
-        I am Burak, a software engineer working at [![Tyk](images/tyk-logo.png)](https://tyk.io/), who is interested in distributed systems and developer tooling. 
-
-        At [![Tyk](images/tyk-logo.png)](https://tyk.io/), I work on
-
-          - [Tyk Operator](https://github.com/TykTechnologies/tyk-operator/), Kubernetes Operator managing Tyk resources on Kubernetes.
-          - [Tyk Charts](https://github.com/TykTechnologies/tyk-charts/), Helm Charts to deploy Tyk stack on Kubernetes.
-          - [Tyk K8s Bootstrap](https://github.com/TykTechnologies/tyk-k8s-bootstrap/), Helm Chart hooks to bootstrap [tyk-stack](https://github.com/TykTechnologies/tyk-charts/tree/main/tyk-stack) Helm Chart in Kubernetes.
-          - [Tyk Schemas](https://marketplace.visualstudio.com/items?itemName=TykTechnologiesLimited.tyk-schemas), a VsCode extension providing JSON validation for files used by Tyk products.
-          - Other internal DX projects...
-
-        Find me on 👇
-
-      imageTitle: my image
-      # imageWidth: 120
-      # imageHeight: 120
-      buttons: null
+    imageTitle: my image
+    # imageWidth: 120
+    # imageHeight: 120
+    buttons: null
 
   mainSections:
     - archieve
@@ -70,12 +76,12 @@ params:
 
 
   socialIcons:
-      - name: github
-        url: "https://github.com/buraksekili"
-      - name: linkedin
-        url: "https://www.linkedin.com/in/sekili/"
-      - name: twitter
-        url: "https://twitter.com/buraksekili"
+    - name: github
+      url: "https://github.com/buraksekili"
+    - name: linkedin
+      url: "https://www.linkedin.com/in/sekili/"
+    - name: twitter
+      url: "https://twitter.com/buraksekili"
 
     # add more social icons. find more in svg.html file
     # - name: youtube
@@ -91,16 +97,11 @@ params:
     disableHLJS: true
     disableFingerprinting: false
 
-enableInlineShortcodes: true
-enableRobotsTXT: true
-enableEmoji: true
-pygmentsUseClasses: true
-pygmentsCodeFences: true
 minify:
-    disableXML: true
-    
+  disableXML: true
+
 outputs:
-    home:
-        - HTML
-        - RSS
-        - JSON
+  home:
+    - HTML
+    - RSS
+    - JSON

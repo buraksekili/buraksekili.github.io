@@ -307,6 +307,24 @@ ctrl.NewControllerManagedBy(mgr). // 'mgr' refers to the controller-runtime Mana
 
 I will dive into the detailed explanation of the controller registration process in my future writings to avoid making this post excessively long.
 
+### Starting Manager
+
+```go
+// mgr corresponds to manager.Manager{}
+if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
+    setupLog.Error(err, "problem running manager")
+    os.Exit(1)
+}
+```
+https://github.com/kubernetes-sigs/controller-runtime/blob/v0.16.2/pkg/manager/internal.go#L318
+
+Once the manager starts, all required runnables in the manager will start, in the order of
+- internal HTTP servers; health probes, metrics and profiling if enabled.
+- webhooks,
+- cache, 
+- controllers,
+- leader election.
+
 ## References
 
 [^1]: https://kubernetes.io/docs/concepts/architecture/controller/

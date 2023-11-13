@@ -16,7 +16,7 @@ googleAnalytics: G-M6ZJTX7HVG
 
 menu:
     main:
-      - name: Articles
+      - name: Articless
         url: archives/
       - name: Search
         url: search/
@@ -29,7 +29,7 @@ markup:
     noClasses: false
     lineNos: true
     style: gruvbox
-    tabWidth: 0
+    tabWidth:
 
 params:
   env: production
