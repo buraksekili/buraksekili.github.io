@@ -316,7 +316,6 @@ if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
     os.Exit(1)
 }
 ```
-https://github.com/kubernetes-sigs/controller-runtime/blob/v0.16.2/pkg/manager/internal.go#L318
 
 Once the manager starts, all required runnables in the manager will start, in the order of
 - internal HTTP servers; health probes, metrics and profiling if enabled.
@@ -324,6 +323,8 @@ Once the manager starts, all required runnables in the manager will start, in th
 - cache, 
 - controllers,
 - leader election.
+
+For reference, check [`Start(context.Context)`](https://github.com/kubernetes-sigs/controller-runtime/blob/v0.16.2/pkg/manager/internal.go#L318) method of `controllerManager` struct.
 
 ## References
 
