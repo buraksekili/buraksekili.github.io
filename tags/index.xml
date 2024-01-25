@@ -6,7 +6,25 @@
     <description>Recent content in Tags on Burak Sekili</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 02 Nov 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://buraksekili.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 24 Jan 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://buraksekili.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Concurrency</title>
+      <link>https://buraksekili.github.io/tags/concurrency/</link>
+      <pubDate>Wed, 24 Jan 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://buraksekili.github.io/tags/concurrency/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Go</title>
+      <link>https://buraksekili.github.io/tags/go/</link>
+      <pubDate>Wed, 24 Jan 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://buraksekili.github.io/tags/go/</guid>
+      <description></description>
+    </item>
+    
     <item>
       <title>controller-runtime</title>
       <link>https://buraksekili.github.io/tags/controller-runtime/</link>
