@@ -29,7 +29,7 @@ markup:
     noClasses: false
     lineNos: true
     style: gruvbox
-    tabWidth: 0
+    tabWidth: 1
 
 params:
   env: production
@@ -42,6 +42,8 @@ params:
   ShowPostNavLinks: true
   ShowBreadCrumbs: true
   ShowAllPagesInArchive: true
+  ShowRssButtonInSectionTermList: true
+  ShowFullTextinRSS: false
 
   ShowCodeCopyButtons: true
   ShowToc: true
@@ -76,12 +78,12 @@ params:
 
 
   socialIcons:
+    - name: twitter
+      url: "https://twitter.com/buraksekili"
     - name: github
       url: "https://github.com/buraksekili"
     - name: linkedin
       url: "https://www.linkedin.com/in/sekili/"
-    - name: twitter
-      url: "https://twitter.com/buraksekili"
 
     # add more social icons. find more in svg.html file
     # - name: youtube
