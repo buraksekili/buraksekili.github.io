@@ -326,6 +326,11 @@ Once the manager starts, all required runnables in the manager will start, in th
 
 For reference, check [`Start(context.Context)`](https://github.com/kubernetes-sigs/controller-runtime/blob/v0.16.2/pkg/manager/internal.go#L318) method of `controllerManager` struct.
 
+---
+
+Feel free to suggest improvements on [GitHub](https://github.com/buraksekili/buraksekili.github.io/blob/main/content/articles/controller-runtime-1.md) or through my [Twitter](https://twitter.com/buraksekili) 
+
+
 ## References
 
 [^1]: https://kubernetes.io/docs/concepts/architecture/controller/
@@ -333,5 +338,7 @@ For reference, check [`Start(context.Context)`](https://github.com/kubernetes-si
 [^3]: https://pkg.go.dev/sigs.k8s.io/controller-runtime/pkg/client
 [^4]: https://github.com/kubernetes/sample-controller/blob/master/docs/controller-client-go.md
 [^5]: https://github.com/kubernetes-sigs/controller-runtime/blob/v0.16.3/pkg/cache/internal/informers.go#L56
+
+
 
 [godocs]: https://pkg.go.dev/sigs.k8s.io/controller-runtime/pkg/manager
