@@ -32,7 +32,7 @@ Whenever I dive into code base, I always learn something new about the underlyin
 
 Through this blog series, I aim to share my learning regarding [`controller-runtime`][ctrl] consolidating my notes spread across various notebooks.
 
-This article will specifically delve into the role of [`controller-runtime`][ctrl] Manager.
+This article will specifically dive into the role of [`controller-runtime`][ctrl] Manager.
 
 ## What are Controllers and Operators?
 
