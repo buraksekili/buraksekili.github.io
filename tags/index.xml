@@ -6,7 +6,34 @@
     <description>Recent content in Tags on Burak Sekili</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Wed, 24 Jan 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://buraksekili.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 13 Aug 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://buraksekili.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>AWS</title>
+      <link>https://buraksekili.github.io/tags/aws/</link>
+      <pubDate>Tue, 13 Aug 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://buraksekili.github.io/tags/aws/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>EKS</title>
+      <link>https://buraksekili.github.io/tags/eks/</link>
+      <pubDate>Tue, 13 Aug 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://buraksekili.github.io/tags/eks/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Kubernetes</title>
+      <link>https://buraksekili.github.io/tags/kubernetes/</link>
+      <pubDate>Tue, 13 Aug 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://buraksekili.github.io/tags/kubernetes/</guid>
+      <description></description>
+    </item>
+    
     <item>
       <title>Concurrency</title>
       <link>https://buraksekili.github.io/tags/concurrency/</link>
@@ -31,15 +58,6 @@
       <pubDate>Thu, 02 Nov 2023 00:00:00 +0000</pubDate>
       
       <guid>https://buraksekili.github.io/tags/controller-runtime/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Kubernetes</title>
-      <link>https://buraksekili.github.io/tags/kubernetes/</link>
-      <pubDate>Thu, 02 Nov 2023 00:00:00 +0000</pubDate>
-      
-      <guid>https://buraksekili.github.io/tags/kubernetes/</guid>
       <description></description>
     </item>
     

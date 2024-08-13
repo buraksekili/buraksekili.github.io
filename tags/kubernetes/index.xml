@@ -6,7 +6,16 @@
     <description>Recent content in Kubernetes on Burak Sekili</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 02 Nov 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://buraksekili.github.io/tags/kubernetes/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 13 Aug 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://buraksekili.github.io/tags/kubernetes/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Fundamental EKS requirements</title>
+      <link>https://buraksekili.github.io/articles/eks/</link>
+      <pubDate>Tue, 13 Aug 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://buraksekili.github.io/articles/eks/</guid>
+      <description>Brief summary of EKS requirments on AWS resources</description>
+    </item>
+    
     <item>
       <title>Diving into controller-runtime | Manager</title>
       <link>https://buraksekili.github.io/articles/controller-runtime-1/</link>
