@@ -3,14 +3,14 @@ editPost:
   URL: "https://github.com/buraksekili/buraksekili.github.io/blob/main/content/articles/rust-serde.md"
   Text: "Edit this page on "
 author: "Burak Sekili"
-title: "Writing Custom Data Format in Rust using serde"
+title: "Working with Custom Data Format in Rust serde"
 date: "2024-08-23"
 description: "How to serialize and deserialize a custom custom data format in Rust using serde"
 tags: ["Rust", "serde"]
 TocOpen: true
 ---
 
-# Writing Custom Data Format in Rust using serde
+# Working with Custom Data Format in Rust serde
 
 If you need to perform serialization or deserialization in Rust, you’ve most likely used the _serde_ before.
 I’m currently learning Rust, and I found myself needing similar thing.
@@ -429,8 +429,11 @@ impl<'de, 'a> de::Deserializer<'de> for &'a mut Deserializer<'de> {
         visitor.visit_str::<Self::Error>(&self.input)
     }
 
-    // rest of the deserialize_* methods. as Serializer, i do not list them all here as there is a deserialize_*
+    // Rest of the deserialize_* methods ...
+    //
+    // As Serializer, i do not list them all here as there is a deserialize_*
     // method for almost all type.
+    //
     // For more detail about it, please refer to the:
     //      https://docs.rs/serde/1.0.208/serde/trait.Deserializer.html#
 }
@@ -466,7 +469,7 @@ primary source of truth.
 
 Also, the source code is available on GitHub: https://github.com/buraksekili/kvs_protocol/
 
-If you notice any mistakes or have feedback, feel free to reach out to me on Twitter, LinkedIn, or GitHub.
+If you notice any mistakes or have feedback, feel free to reach out to me on [Twitter](https://x.com/buraksekili), [LinkedIn](https://www.linkedin.com/in/sekili/), or GitHub.
 
 ## References
 
