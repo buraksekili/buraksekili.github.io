@@ -2,10 +2,22 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://buraksekili.github.io/tags/aws/</loc>
-    <lastmod>2024-08-13T13:32:53+03:00</lastmod>
-  </url><url>
     <loc>https://buraksekili.github.io/</loc>
+    <lastmod>2024-08-23T16:04:35+03:00</lastmod>
+  </url><url>
+    <loc>https://buraksekili.github.io/tags/rust/</loc>
+    <lastmod>2024-08-23T16:04:35+03:00</lastmod>
+  </url><url>
+    <loc>https://buraksekili.github.io/tags/serde/</loc>
+    <lastmod>2024-08-23T16:04:35+03:00</lastmod>
+  </url><url>
+    <loc>https://buraksekili.github.io/tags/</loc>
+    <lastmod>2024-08-23T16:04:35+03:00</lastmod>
+  </url><url>
+    <loc>https://buraksekili.github.io/articles/rust-serde/</loc>
+    <lastmod>2024-08-23T16:04:35+03:00</lastmod>
+  </url><url>
+    <loc>https://buraksekili.github.io/tags/aws/</loc>
     <lastmod>2024-08-13T13:32:53+03:00</lastmod>
   </url><url>
     <loc>https://buraksekili.github.io/tags/eks/</loc>
@@ -15,9 +27,6 @@
     <lastmod>2024-08-13T13:32:53+03:00</lastmod>
   </url><url>
     <loc>https://buraksekili.github.io/tags/kubernetes/</loc>
-    <lastmod>2024-08-13T13:32:53+03:00</lastmod>
-  </url><url>
-    <loc>https://buraksekili.github.io/tags/</loc>
     <lastmod>2024-08-13T13:32:53+03:00</lastmod>
   </url><url>
     <loc>https://buraksekili.github.io/tags/concurrency/</loc>
