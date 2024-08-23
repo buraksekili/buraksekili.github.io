@@ -3,17 +3,18 @@ editPost:
   URL: "https://github.com/buraksekili/buraksekili.github.io/blob/main/content/articles/rust-serde.md"
   Text: "Edit this page on "
 author: "Burak Sekili"
-title: "Working with Custom Data Format in Rust serde"
+title: "Working with Custom Data Format in Rust using serde"
 date: "2024-08-23"
 description: "How to serialize and deserialize a custom custom data format in Rust using serde"
 tags: ["Rust", "serde"]
 TocOpen: true
 ---
 
-# Working with Custom Data Format in Rust serde
+## Working with Custom Data Format in Rust using serde
 
 If you need to perform serialization or deserialization in Rust, you’ve most likely used the _serde_ before.
 I’m currently learning Rust, and I found myself needing similar thing.
+
 To get familiar with the Rust ecosystem, I decided to develop a simple key-value store.
 Initially, the engine for this key-value store was designed to work with JSON objects, as JSON is a widely-used format that’s straightforward to use with web clients.
 Also, as most of the languages and platforms already support JSON, it is a good choice to start with.
@@ -29,12 +30,13 @@ You only need to add a few macros, and serde will automatically implement serial
 As JSON is one of the most popular data formats, you can set this up with just a few lines of code. I am not going to give details about how to achieve this as
 [serde documentation](https://serde.rs/) has handful examples regarding this.
 
-After checking similar projects, I realized that most of the engines do not use these widely adopted data formats in place to interact with underlying storage engine.
+After checking similar projects, I realized that most of the engines do not use these widely adopted data formats in place with their storage engine.
 Of course, the reasons of this may vary but the fundamental concerns are more or less the same: performance and simplicity. In my case, users only `get`, `set` or `rm`
 the key. So, using JSON is a bit overkill here.
-I totally agree that it is quite straightforward to implement and get start with but what happens if I want to introduce a simple - and to be honest useless and dumbest -
+I totally agree that it is quite straightforward to implement and get start with JSON but what happens if I want to introduce a simple - and to be honest useless and dumbest -
 data format to interact with my key-value storage engine? Considering that my learning purpose of Rust, the idea looks okay to me.
-Then, i started to focus on how to work with custom data format with _serde_? So that I can serialize Rust data types to my data format and deserialize some byte sequence such
+
+Then, I started to focus on how to work with custom data format with _serde_? So that I can serialize Rust data types to my data format and deserialize some byte sequence such
 as strings back to Rust types?
 
 ## Concepts
@@ -45,6 +47,7 @@ Before jumping into implementation details, it'd be better to get familiar with 
 
 First things first, let’s try to understand what the data format is. Simply put, a data format defines how the data is stored and structured.
 For example, well-known data formats such as JSON, CSV, and TOML can store the same data but in different ways.
+
 You probably use these formats on a daily basis as they are widely adopted and used. Almost every language support these data formats more or less.
 Although these formats use different syntax while representing the data, the underlying data they represent is the same.
 
@@ -303,16 +306,16 @@ Now that our serializer works as expected, let's move on to deserializing our cu
 
 Writing a custom deserializer can be more complicated than writing a serializer. I found myself confused quite often while working on the implementation at first. However, I'll try to simplify the explanation as much as possible.
 
-In `serde`, deserialization is a two-phase process that involves both a `Deserializer` and a `Visitor`. Let's start with the `Deserializer`.
+In _serde_, deserialization is a two-phase process that involves both a `Deserializer` and a `Visitor`. Let's start with the `Deserializer`.
 
 Deserializer is responsible for interpreting the input, which is a data format in form of string, byte, binary etc., and matching
 this input data format to serde data model, such as integer, sequence and so on.
-Here, the `serde` data model refers to the data types defined within `serde`, which correspond closely to Rust's type system.
-For example, `bool` in `serde` corresponds to the `boolean` type in Rust.
-The `serde` documentation provides a clear explanation of the data model, including an example using `OsString`, which is highly recommended
-if you're not already familiar with `serde`'s data model. Please refer to the docs https://serde.rs/data-model.html.
+Here, the _serde_ data model refers to the data types defined within _serde_, which correspond closely to Rust's type system.
+For example, `bool` in _serde_ corresponds to the `boolean` type in Rust.
+The _serde_ documentation provides a clear explanation of the data model, including an example using `OsString`, which is highly recommended
+if you're not already familiar with _serde_'s data model. Please refer to the docs https://serde.rs/data-model.html.
 
-Once the `Deserializer` matches input data to the appropriate `serde` data model,
+Once the `Deserializer` matches input data to the appropriate _serde_ data model,
 a _Visitor_ is then used to analyze this generic data and convert it into the specific data type we want to achieve.
 
 Although this process may sound complicated, let's break it down using a concrete example based on our case.
@@ -463,8 +466,8 @@ fn test_deserialize_set() {
 
 ---
 
-I hope this post helps you get started with your own `serde` implementations.
-Since I am also a beginner in Rust, I encourage you to always refer to the official `serde` documentation as the
+I hope this post helps you get started with your own _serde_ implementations.
+Since I am also a beginner in Rust, I encourage you to always refer to the official _serde_ documentation as the
 primary source of truth.
 
 Also, the source code is available on GitHub: https://github.com/buraksekili/kvs_protocol/
