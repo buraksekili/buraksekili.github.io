@@ -241,7 +241,7 @@ impl<'a> ser::SerializeStructVariant for &'a mut KvRequestSerializer {
     }
 
     fn end(self) -> std::result::Result<Self::Ok, Self::Error> {
-        self.output += ":";
+        self.output += ":\n";
         Ok(())
     }
 }
@@ -297,7 +297,7 @@ fn test_serialization_request_struct() {
         key: "get_key_testing".to_owned(),
     };
 
-    let expected_get = "+:get get_key_testing:";
+    let expected_get = "+:get get_key_testing:\n";
     assert_eq!(serialize(&get_request), expected_get);
 }
 ```
@@ -360,7 +360,7 @@ impl<'de> de::Visitor<'de> for RequestVisitor {
     type Value = Request;
 
     fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-        formatter.write_str("a command in the format ':<cmd> <required_key> <optional_value>'")
+        formatter.write_str("a command in the format '+:<cmd> <required_key> <optional_value>'")
     }
 
     fn visit_str<E>(self, cmd_str: &str) -> std::result::Result<Self::Value, E>
@@ -377,18 +377,20 @@ impl<'de> de::Visitor<'de> for RequestVisitor {
 
         let cmd_name = inputs[0];
 
-        let get_key = |key: &str| -> String {
-            let trimmed = key.trim();
-
-            if trimmed.ends_with(":") {
-                return trimmed
-                    .get(0..trimmed.len() - 1)
-                    .unwrap_or(trimmed)
-                    .to_owned();
+        let get_key = |k: &str| -> String {
+            if k.ends_with(":") {
+                return k.get(0..k.len() - 1).unwrap_or(k).to_owned();
+            } else if k.ends_with(":\n") {
+                return k.get(0..k.len() - 2).unwrap_or(k).to_owned();
             }
 
-            return trimmed.to_owned();
+            return k.to_owned();
         };
+
+        let mut cmd_name = inputs[0];
+        if cmd_name.starts_with("+:") {
+            cmd_name = cmd_name.trim().get(2..cmd_name.len()).unwrap_or(cmd_name);
+        }
 
         let key = inputs[1];
 
@@ -396,7 +398,7 @@ impl<'de> de::Visitor<'de> for RequestVisitor {
             "get" => Ok(Request::Get { key: get_key(key) }),
             "rm" => Ok(Request::Rm { key: get_key(key) }),
             "set" => {
-                let val = inputs[2].trim();
+                let val = inputs[2];
 
                 Ok(Request::Set {
                     key: key.to_owned(),
@@ -431,6 +433,11 @@ impl<'de, 'a> de::Deserializer<'de> for &'a mut Deserializer<'de> {
     where
         V: de::Visitor<'de>,
     {
+        self.input = self
+            .input
+            .strip_suffix("\r\n")
+            .or(self.input.strip_suffix("\n"))
+            .unwrap_or(self.input);
         visitor.visit_str::<Self::Error>(&self.input)
     }
 
