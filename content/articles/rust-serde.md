@@ -54,13 +54,13 @@ Although these formats use different syntax while representing the data, the und
 In my case, I wanted to introduce a simple custom data format, which looks like this:
 
 ```
-\r:<cmd_name> <key> <optional_value>:
++:<cmd_name> <key> <optional_value>:
 ```
 
 This format allows me to store a sequence of commands - essentially the requests that users send to the key-value engine, such as fetching a key - in a log file.
 This format is of course not complicated and maybe even not quite helpful compared to JSON but it is of course cleaner and easier for me to work with.
 For instance, using this format makes it easy for my parser to determine where a command request
-starts in the file, as each command is prefixed with `\r:` and ends with a colon `:`.
+starts in the file, as each command is prefixed with `+:` and ends with a colon `:`.
 
 This data format of course is NOT a JSON (or YAML, CSV and whatever) which means I cannot use existing deserializer of already knowns data formats.
 This means I need to implement my own basic serializer and deserializer to convert Rust data structures,
@@ -113,7 +113,7 @@ pub enum Request {
 First start with serializing this data type into our custom data format:
 
 ```
-\r:<cmd_name> <key> <optional_value>:
++:<cmd_name> <key> <optional_value>:
 ```
 
 In order to serialize our enum, we need to implement [Serialize](https://docs.rs/serde/1.0.208/serde/ser/trait.Serialize.html) trait for our `Request`
@@ -216,8 +216,7 @@ impl<'a> ser::Serializer for &'a mut KvRequestSerializer {
             "Rm" => Ok("rm"),
             _ => Err(Error::InvalidData(String::from("invalid request provided"))),
         }?;
-        self.output += "\r";
-        self.output += ":";
+        self.output += "+:";
         self.output += req_type;
         Ok(self)
     }
@@ -298,7 +297,7 @@ fn test_serialization_request_struct() {
         key: "get_key_testing".to_owned(),
     };
 
-    let expected_get = "\r:get get_key_testing:";
+    let expected_get = "+:get get_key_testing:";
     assert_eq!(serialize(&get_request), expected_get);
 }
 ```
