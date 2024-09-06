@@ -360,20 +360,24 @@ impl ThreadPool {
 }
 ```
 
-To notify workers that listens the queue, we set the `running` flag to false.
+To notify workers polling the queue, we set the `running` flag to false.
 This is an atomic operation that immediately signals all workers that a shutdown
-is in progress. As all threads need to finish executing or waiting for a new task
-during shutdown, `job_available` is set to true and we notify all threads waiting on the
-condition variable. We use `try_lock()` instead of `lock()`.
-This attempts to acquire the lock but returns immediately if it can't,
-rather than waiting.
+is in progress.
+Since all threads need to finish executing the task they assigned to or stop waiting
+for next job (through `cvar.wait_timeout` method in `Worker::new` method) for proper shutdown,
+`job_available` is set to true, which triggers all threads and we notify all threads waiting on the
+condition variable.
+
+We use `try_lock()` instead of `lock()` while notifying the threads.
+This attempts to acquire the lock but returns immediately if it can't, rather than waiting until
+acquiring the lock.
 
 - If the lock is acquired, we proceed as before: set `job_available` to true and notify all waiting threads. By doing that, we can ensure that idle workers that were waiting
   on `cvar.wait_timeout` will wake up and notice the shutdown signal.
 
 - If the lock is not acquire successfully, the shutdown process continues. As `running`
   is already set to false, which all workers check periodically and
-  `wait_timeout` in Worker's main loop will expire - so they'll wake up eventually
+  `wait_timeout` in `Worker`'s main loop will expire - so they'll wake up eventually
   and notice that `running` is false.
 
 After sending signals to notify threads, then we iterate through all workers,
@@ -394,8 +398,8 @@ impl Drop for ThreadPool {
 }
 ```
 
-Implementing a thread pool in Rust offers a deep insight into the Rust's approach to concurrency and memory safety.
-Through the blog post, i've tried to explain some concepts
+Implementing a thread pool in Rust offers a great opportunity to practice Rust's concurrency and memory safety paradigms.
+Throughout this blog post, I've tried to explain some concepts
 such as atomic operations, condition variables, and Rust's ownership system in a
 practical context.
 While the implementation provides a solid foundation, there's always room for improvement and optimization - so, ofc not use it on anywhere :)
