@@ -20,7 +20,7 @@ Unlike Go's lightweight goroutines, Rust's threads map directly to OS threads, m
 technique for resource management and performance optimization.
 
 At its core, a thread pool is a collection of worker threads that are ready to execute given tasks.
-Instead of spawning a new thread for each task - a potentially costly operation in Rust - tasks are
+Instead of spawning a new thread for each task - potentially costly operation in Rust - tasks are
 submitted to the pool and executed by available workers (threads).
 This pattern is useful in various scenarios: web servers handling multiple client connections,
 task scheduling systems processing queued jobs, parallel data processing applications crunching large datasets,
@@ -36,35 +36,36 @@ However, thread pools are not without their challenges.
 
 - Introducing additional complexity to the codebase, requiring careful management of shared state
   and synchronization to avoid pitfalls like deadlocks and race conditions,
-- For very short-lived tasks, the overhead of task submission might outweigh the benefits,
-  - This means that sometimes if your task is not long-running one or not compute expensive,
+- For very short-lived tasks, the overhead of task submission might outweigh the benefits.
+  - This means that sometimes if your task is not long-running or not compute expensive,
     sending this execution to another thread might be longer than the time spent on preparation
     of the task and sending it to a thread.
   - Let's say a task takes 1 ms to execute directly. If the overhead of submitting to and retrieving
     from the thread pool takes 10 ms, you're spending 11 ms total instead of just 1.
   - Determining the optimal pool size can be a tricky process as well.
-  - Contention or starvation may happen, when workers are busy with long tasks,
-    leaving shorter tasks waiting in line for a long time.
+  - Contention or starvation may happen. For instance, while workers are busy with long running tasks,
+    shorter tasks are waiting in line for a long time.
 
-In the context of Rust, additional language-specific considerations arise. The ownership system,
-Rust's memory safety guarantees, requires careful implementation - that's why I wanted to implement
+In the context of Rust, additional language-specific considerations arise. The ownership system and
+Rust's memory safety guarantees require careful implementation - that's why I wanted to implement
 the pooling from scratch. It helped me to practice concurrency practices in Rust while considering
 ownership model.
 
-Now, let's start implementing a thread pool in Rust
+Now, let's start implementing a thread pool in Rust.
 
 ## Implementation
 
 > Please read Rust book's thread pool section if you haven't read before: https://rust-book.cs.brown.edu/ch20-02-multithreaded.html
 
-Now our thread pool, as explained above, will have already prepared threads which are ready to execute
-a task. Here, we will use `Worker` to represents an individual thread in our pool
-
+Our thread pool, as explained above, will have already initialized threads which are ready to execute
+a task. Here, we will use `Worker` to represents an individual thread in our pool.
 
 ### Worker
 
 Each worker runs in its own thread, continuously polling for jobs. Its purpose is to process the given
-jobs. You may ask who gives the task to worker. Worker will poll the jobs from a queue which will be
+jobs.
+
+You may ask who gives the task to worker. Worker will poll the jobs from a queue which will be
 shared among all other workers. If no jobs are available, the worker needs to wait until another task
 is submitted to queue.
 
@@ -90,23 +91,26 @@ So, the requirements that we expect from the worker:
     we also start listening this queue.
   - The queue needs to be shared among all workers. That's why it needs to be thread-safe.
 
-While creating a Worker, we will use std::thread and spawn the thread.
+While creating a Worker, we will use `std::thread` and spawn the thread.
 In the closure of the thread, we will run our logic to pull tasks from the queue.
 
 If there is a task on the queue, the thread will execute the task, and then waits
-for a next task to schedule it for itself. As Worker needs to re-run tasks after
+for a next task to be scheduled for itself. As Worker needs to re-run tasks after
 executing a single one, it needs to run continous loop in order not to miss any
 task pushed into queue.
 
-If no task is provided, the queue will return None. In that case, the thread
+If no task is provided, the queue will return `None`. In that case, the thread
 needs to wait for next task to be scheduled. Therefore, thread needs to wait within
-the loop. There are various way to do that but most simple one is sleeping.
-However, sleeping leads to a busy-waiting which wastes CPU cycles. Also,
+the loop.
+
+There are various way to do that but most simple one is sleeping.
+However, sleeping leads to busy-waiting which wastes CPU cycles. Also,
 if there are new tasks registered while the thread is sleeping, the worker
 will run the thread after a duration of sleep which causes a latency.
-Instead of sleeping, I will use `Condvar` which is a synchronisation primitive
+
+Instead of sleeping, we will use `Condvar` which is a synchronisation primitive
 to allow threads to wait for some condition to become true. It's often used in
-conjunction with a Mutex to provide a way for threads to efficiently wait for
+conjunction with a `Mutex` to provide a way for threads to efficiently wait for
 changes in shared state. So, we will use `Condvar` to wait for new tasks to be
 available as it allows immediate response when the job is available which
 improves thread utilization.
@@ -149,9 +153,9 @@ impl Worker {
 
 Our queue depends on `crossbeam`'s `crossbeam_queue::SegQueue` which is a concurrent
 queue implementation. It's designed for high-performance concurrent scenarios. Also,
-it is lock-free which is an important aspect of SegQueue.
+it is lock-free which is an important aspect of `SegQueue`.
 
-Our queue is actually a linked list of `Job` enum which will look like following:
+Our queue is actually a linked list of `Job` which will look like following:
 
 ```rust
 pub enum Job {
@@ -182,12 +186,12 @@ Here we have two main parts; the `FnOnce()` and the return type of this closure,
 > dispatch uses trait objects to resolve generic function calls at runtime.
 
 - `Box<dyn ...>`: Box is used for heap allocation. `dyn` indicates a trait object,
-allowing for dynamic dispatch.
+  allowing for dynamic dispatch.
 - `Send`: This trait bound ensures the closure can be safely sent between threads.
 - 'static: This lifetime bound ensures the closure doesn't contain any
-non-static references. 'static bound ensures a type is safe to use without
-lifetime constraints. Without 'static, we might create closures that reference
-stack-local variables, leading to use-after-free bugs.
+  non-static references. 'static bound ensures a type is safe to use without
+  lifetime constraints. Without 'static, we might create closures that reference
+  stack-local variables, leading to use-after-free bugs.
 
 In arguments of `Worker::new`, the use of Arc allows safe sharing of the job queue
 and signaling mechanism between threads.
@@ -399,5 +403,6 @@ If you notice any mistakes or have feedback, feel free to reach out to me on
 [Twitter](https://x.com/buraksekili), [LinkedIn](https://www.linkedin.com/in/sekili/), or GitHub.
 
 ## References
+
 - https://doc.rust-lang.org/book/ch20-02-multithreaded.html
 - https://github.com/crossbeam-rs/crossbeam
