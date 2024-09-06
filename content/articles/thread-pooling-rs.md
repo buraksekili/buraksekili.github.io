@@ -166,37 +166,41 @@ pub enum Job {
 
 Job has two possible values, `Task` and `Shutdown`.
 
-The Shutdown job type allows us to break the loop and terminate the thread gracefully.
+The `Shutdown` job type allows us to break the loop and terminate the thread gracefully.
 If a thread receives a `Shutdown` from the queue, it will stop executing.
 
 Okay, now check the `Task`. I know it looks too complicated at first glance, it still
-looks complicated to me. I'll try to break it down
+looks complicated to me. I'll try to break it down.
 
-`Box<dyn FnOnce() -> Result<(), Box<dyn std::error::Error>> + Send + 'static>`
+- `Box<dyn FnOnce() -> Result<(), Box<dyn std::error::Error>> + Send + 'static>`
+
 Here we have two main parts; the `FnOnce()` and the return type of this closure,
 `Box<dyn std::error::Error>> + Send + 'static`
 
-- `FnOnce()` - It is a closure without taking any arguments. It is same as `thread::spawn(|| {})`
-  closure. It helps us to prevent accidentally call a task multiple times when
-  it's not safe to do so. - `-> Result<(), Box<dyn std::error::Error>>` The closure returns a `Result` type.
-  On success, it returns `()` (unit, or void). On error, it returns a boxed trait object
-  of `std::error::Error`.
+- `FnOnce()`:
+  - It is a closure without taking any arguments. It is same as `thread::spawn(|| {})`
+    closure.
+  - helps us to prevent accidentally call a task multiple times when
+    it's not safe to do so.
+  - `-> Result<(), Box<dyn std::error::Error>>` is the return type of this closure.
+    On success, it returns `()` (unit, or void). On error, it returns a boxed trait object
+    of `std::error::Error`.
 
 > Trait object is one of the ways in Rust to write polymorphic code. Especially, dynamic
 > dispatch uses trait objects to resolve generic function calls at runtime.
 
 - `Box<dyn ...>`: Box is used for heap allocation. `dyn` indicates a trait object,
   allowing for dynamic dispatch.
-- `Send`: This trait bound ensures the closure can be safely sent between threads.
-- 'static: This lifetime bound ensures the closure doesn't contain any
-  non-static references. 'static bound ensures a type is safe to use without
-  lifetime constraints. Without 'static, we might create closures that reference
+- `Send`: is a trait which ensures the closure can be safely sent between threads.
+- `'static`: is a lifetime bound ensuring the closure doesn't contain any
+  non-static references. `'static` bound ensures a type is safe to use without
+  lifetime constraints. Without `'static`, we might create closures that reference
   stack-local variables, leading to use-after-free bugs.
 
-In arguments of `Worker::new`, the use of Arc allows safe sharing of the job queue
+In the arguments of `Worker::new` method, the use of `Arc` allows safe sharing of the job queue
 and signaling mechanism between threads.
 This is crucial in Rust's ownership model for concurrent programming.
-Otherwise, we cannot use shared data between threads as it will cause lots of critical bugs.
+Otherwise, shared data cannot be used safely among multiple threads as it will cause lots of critical bugs.
 
 ### Thread Pool
 
@@ -208,6 +212,9 @@ pub struct ThreadPool {
     job_queue: Arc<SegQueue<Job>>,
     // job_signal is notifier for workers when new jobs are available.
     job_signal: Arc<(Mutex<bool>, Condvar)>,
+    // running indicates whether the threadpool is actively running or not.
+    // it is mainly checked by worker threads to understand the status
+    // of the pool.
     running: Arc<AtomicBool>,
 }
 
@@ -245,13 +252,11 @@ impl ThreadPool {
         let job = Job::Task(Box::new(f));
         // Push this job to our queue
         self.job_queue.push(job);
-
         // Signal that a new job is available
         let (lock, cvar) = &*self.job_signal;
         let mut job_available = lock.lock().unwrap();
         *job_available = true;
         cvar.notify_all();
-
         Ok(())
     }
 }
@@ -262,8 +267,8 @@ each with shared access to the job queue and signaling mechanism.
 
 `ThreadPool::execute` takes a generic parameter called `F` which implements
 `FnOnce() -> Result<(), Box<dyn std::error::Error>> + Send + 'static`. This type
-is the same type used for `Job::Task`. The argument passed in `execute` is actually a
-task that needs to be run in any of the workers.
+is the same type used for `Job::Task` - so that we can use argument `f` as `Job`.
+The argument passed in `execute` is actually a task that needs to be run in any of the workers.
 
 For example,
 
@@ -284,12 +289,12 @@ The `execute` will take closure function as argument and we wrap the user's clos
   with interfaces in other languages) for our job queue.
   All items in the queue are of type `Job`, regardless of the closure they contain.
 
-But, why do we use Box? The Box is crucial here for several reasons:
+But, why do we use `Box`? The `Box` is crucial here for several reasons:
 
 - We are using `dyn FnOnce()` which is a trait object.
   In Rust, trait objects must be behind a pointer, and `Box` provides this.
-- Closures can capture variables from their environment - as we did in the example above,
-  making their size unknown at compile time. Box puts the closure on the heap,
+- Closures can capture variables from their environment - as we did in the example above -
+  which makes their size unknown at compile time. Box puts the closure on the heap,
   giving it a known size (the size of a pointer) at compile time.
 - Box allows us to take ownership of the closure and move it into the `Job` enum,
   which is necessary because the closure will be executed in a different thread.
@@ -306,7 +311,6 @@ This design actually allows us to:
 impl ThreadPool {
     pub fn shutdown(&mut self, timeout: Duration) -> Result<(), ThreadPoolError> {
         let start = Instant::now();
-
         // Step 1: Signal all workers to stop
         self.running.store(false, Ordering::SeqCst);
 
