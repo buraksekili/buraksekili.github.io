@@ -181,13 +181,13 @@ Here we have two main parts; the `FnOnce()` and the return type of this closure,
 > Trait object is one of the ways in Rust to write polymorphic code. Especially, dynamic
 > dispatch uses trait objects to resolve generic function calls at runtime.
 
-    - `Box<dyn ...>`: Box is used for heap allocation. `dyn` indicates a trait object,
-    allowing for dynamic dispatch.
-    - `Send`: This trait bound ensures the closure can be safely sent between threads.
-    - 'static: This lifetime bound ensures the closure doesn't contain any
-    non-static references. 'static bound ensures a type is safe to use without
-    lifetime constraints. Without 'static, we might create closures that reference
-    stack-local variables, leading to use-after-free bugs.
+- `Box<dyn ...>`: Box is used for heap allocation. `dyn` indicates a trait object,
+allowing for dynamic dispatch.
+- `Send`: This trait bound ensures the closure can be safely sent between threads.
+- 'static: This lifetime bound ensures the closure doesn't contain any
+non-static references. 'static bound ensures a type is safe to use without
+lifetime constraints. Without 'static, we might create closures that reference
+stack-local variables, leading to use-after-free bugs.
 
 In arguments of `Worker::new`, the use of Arc allows safe sharing of the job queue
 and signaling mechanism between threads.
