@@ -59,8 +59,6 @@
 
     </style>
 </noscript>
-  
-    
       <script async src="https://www.googletagmanager.com/gtag/js?id=G-M6ZJTX7HVG"></script>
       <script>
         var doNotTrack = false;
@@ -74,11 +72,7 @@
           gtag('js', new Date());
           gtag('config', 'G-M6ZJTX7HVG');
         }
-      </script>
-    
-  
-
-<meta property="og:title" content="Articles" />
+      </script><meta property="og:title" content="Articles" />
 <meta property="og:description" content="" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://buraksekili.github.io/articles/" />
@@ -176,12 +170,27 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2>Thread Pooling in Rust 
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>A thread pool is a software design pattern where a set of worker threads is created to execute tasks concurrently. Instead of creating a new thread for each task, which can be resource-intensive, tasks are submitted to the pool and executed by available worker threads.
+This blog post will go through a simple thread pool implementation - similar to the one in Rust book - with a couple of simple enhancements.
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-09-06 00:00:00 +0000 UTC'>September 6, 2024</span>&nbsp;·&nbsp;13 min&nbsp;·&nbsp;Burak Sekili</footer>
+  <a class="entry-link" aria-label="post link to Thread Pooling in Rust " href="https://buraksekili.github.io/articles/thread-pooling-rs/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2>Working with Custom Data Format in Rust using serde
     </h2>
   </header>
   <div class="entry-content">
     <p>Working with Custom Data Format in Rust using serde If you need to perform serialization or deserialization in Rust, you’ve most likely used the serde before. I’m currently learning Rust, and I found myself needing similar thing.
-To get familiar with the Rust ecosystem, I decided to develop a simple key-value store. Initially, the engine for this key-value store was designed to work with JSON objects, as JSON is a widely-used format that’s straightforward to use with web clients....</p>
+To get familiar with the Rust ecosystem, I decided to develop a simple key-value store. Initially, the engine for this key-value store was designed to work with JSON objects, as JSON is a widely-used format that’s straightforward to use with web clients. Also, as most of the languages and platforms already support JSON, it is a good choice to start with.
+...</p>
   </div>
   <footer class="entry-footer"><span title='2024-08-23 00:00:00 +0000 UTC'>August 23, 2024</span>&nbsp;·&nbsp;16 min&nbsp;·&nbsp;Burak Sekili</footer>
   <a class="entry-link" aria-label="post link to Working with Custom Data Format in Rust using serde" href="https://buraksekili.github.io/articles/rust-serde/"></a>
@@ -193,8 +202,9 @@ To get familiar with the Rust ecosystem, I decided to develop a simple key-value
     </h2>
   </header>
   <div class="entry-content">
-    <p>This guide is a summary of AWS EKS Best practices documentation to help me to skim through some concepts that i usually refer to. For details, please have a look to official EKS docs mentioned on Resources section.
-EKS (Amazon Elastic Kubernetes Service) It manages Kubernetes control-plane on behalf of you, ensures that each cluster has its own control plane. So, as an end-user, you only need to handle your workloads in worker nodes....</p>
+    <p> This guide is a summary of AWS EKS Best practices documentation to help me to skim through some concepts that i usually refer to. For details, please have a look to official EKS docs mentioned on Resources section.
+EKS (Amazon Elastic Kubernetes Service) It manages Kubernetes control-plane on behalf of you, ensures that each cluster has its own control plane. So, as an end-user, you only need to handle your workloads in worker nodes. All control plane related stuff will be handled by AWS.
+...</p>
   </div>
   <footer class="entry-footer"><span title='2024-08-13 00:00:00 +0000 UTC'>August 13, 2024</span>&nbsp;·&nbsp;5 min&nbsp;·&nbsp;Burak Sekili</footer>
   <a class="entry-link" aria-label="post link to Fundamental EKS requirements" href="https://buraksekili.github.io/articles/eks/"></a>
@@ -208,8 +218,7 @@ EKS (Amazon Elastic Kubernetes Service) It manages Kubernetes control-plane on b
   <div class="entry-content">
     <p>Concurrency Channels Unbuffered channel If channel is unbuffered
 1 ch := make(chan struct{}) sending a data to channel will block the goroutine as the channel is nil.
-1 2 3 4 5 6 7 package main func main() { ch := make(chan struct{}) ch &lt;- struct{}{} } Output of this program is:
-1 2 3 4 5 6 7 $ go run main.go fatal error: all goroutines are asleep - deadlock!...</p>
+1 2 3 4 5 6 7 ...</p>
   </div>
   <footer class="entry-footer"><span title='2024-01-24 00:00:00 +0000 UTC'>January 24, 2024</span>&nbsp;·&nbsp;3 min&nbsp;·&nbsp;Burak Sekili</footer>
   <a class="entry-link" aria-label="post link to Concurrency Notes in Go" href="https://buraksekili.github.io/articles/concurrency/"></a>
@@ -223,7 +232,7 @@ EKS (Amazon Elastic Kubernetes Service) It manages Kubernetes control-plane on b
   <div class="entry-content">
     <p>Introduction controller-runtime package has become a fundamental tool for most Kubernetes controllers, simplifying the creation of controllers to manage resources within a Kubernetes environment efficiently. Users tend to prefer it over client-go.
 The increased adoption of projects like Kubebuilder or Operator SDK has facilitated the creation of Kubernetes Operator projects. Users need to implement minimal requirements to start with Kubernetes controllers, thanks to these projects.
-As a developer working on Kubernetes projects, I inevitably touch code pieces utilizing controller-runtime Whenever I dive into code base, I always learn something new about the underlying mechanism of Kubernetes....</p>
+...</p>
   </div>
   <footer class="entry-footer"><span title='2023-11-02 00:00:00 +0000 UTC'>November 2, 2023</span>&nbsp;·&nbsp;9 min&nbsp;·&nbsp;Burak Sekili</footer>
   <a class="entry-link" aria-label="post link to Diving into controller-runtime | Manager" href="https://buraksekili.github.io/articles/controller-runtime-1/"></a>

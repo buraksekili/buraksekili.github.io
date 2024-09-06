@@ -59,8 +59,6 @@
 
     </style>
 </noscript>
-  
-    
       <script async src="https://www.googletagmanager.com/gtag/js?id=G-M6ZJTX7HVG"></script>
       <script>
         var doNotTrack = false;
@@ -74,11 +72,7 @@
           gtag('js', new Date());
           gtag('config', 'G-M6ZJTX7HVG');
         }
-      </script>
-    
-  
-
-<meta property="og:title" content="Concurrency" />
+      </script><meta property="og:title" content="Concurrency" />
 <meta property="og:description" content="" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://buraksekili.github.io/tags/concurrency/" />
@@ -161,14 +155,27 @@
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
+    <h2>Thread Pooling in Rust 
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>A thread pool is a software design pattern where a set of worker threads is created to execute tasks concurrently. Instead of creating a new thread for each task, which can be resource-intensive, tasks are submitted to the pool and executed by available worker threads.
+This blog post will go through a simple thread pool implementation - similar to the one in Rust book - with a couple of simple enhancements.
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-09-06 00:00:00 +0000 UTC'>September 6, 2024</span>&nbsp;·&nbsp;13 min&nbsp;·&nbsp;Burak Sekili</footer>
+  <a class="entry-link" aria-label="post link to Thread Pooling in Rust " href="https://buraksekili.github.io/articles/thread-pooling-rs/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
     <h2>Concurrency Notes in Go
     </h2>
   </header>
   <div class="entry-content">
     <p>Concurrency Channels Unbuffered channel If channel is unbuffered
 1 ch := make(chan struct{}) sending a data to channel will block the goroutine as the channel is nil.
-1 2 3 4 5 6 7 package main func main() { ch := make(chan struct{}) ch &lt;- struct{}{} } Output of this program is:
-1 2 3 4 5 6 7 $ go run main.go fatal error: all goroutines are asleep - deadlock!...</p>
+1 2 3 4 5 6 7 ...</p>
   </div>
   <footer class="entry-footer"><span title='2024-01-24 00:00:00 +0000 UTC'>January 24, 2024</span>&nbsp;·&nbsp;3 min&nbsp;·&nbsp;Burak Sekili</footer>
   <a class="entry-link" aria-label="post link to Concurrency Notes in Go" href="https://buraksekili.github.io/articles/concurrency/"></a>

@@ -6,7 +6,16 @@
     <description>Recent content in Rust on Burak Sekili</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Fri, 23 Aug 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://buraksekili.github.io/tags/rust/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 06 Sep 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://buraksekili.github.io/tags/rust/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Thread Pooling in Rust </title>
+      <link>https://buraksekili.github.io/articles/thread-pooling-rs/</link>
+      <pubDate>Fri, 06 Sep 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://buraksekili.github.io/articles/thread-pooling-rs/</guid>
+      <description>Explore the implementation and need for thread pools in Rust</description>
+    </item>
+    
     <item>
       <title>Working with Custom Data Format in Rust using serde</title>
       <link>https://buraksekili.github.io/articles/rust-serde/</link>

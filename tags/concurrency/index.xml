@@ -6,7 +6,16 @@
     <description>Recent content in Concurrency on Burak Sekili</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Wed, 24 Jan 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://buraksekili.github.io/tags/concurrency/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Fri, 06 Sep 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://buraksekili.github.io/tags/concurrency/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Thread Pooling in Rust </title>
+      <link>https://buraksekili.github.io/articles/thread-pooling-rs/</link>
+      <pubDate>Fri, 06 Sep 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://buraksekili.github.io/articles/thread-pooling-rs/</guid>
+      <description>Explore the implementation and need for thread pools in Rust</description>
+    </item>
+    
     <item>
       <title>Concurrency Notes in Go</title>
       <link>https://buraksekili.github.io/articles/concurrency/</link>
