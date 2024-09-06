@@ -280,14 +280,14 @@ pool.execute(move || {
 })
 ```
 
-The `execute` will take closure function as argument and we wrap the user's closure
-, which is argument `f: F` in `ThreadPool::execute` in `Job::Task` because:
+The `execute` will take closure function, `f: F`, as an argument and it is used as 
+`Job::Task` wrapped in `Box`. Some of the reasons behind this are:
 
-- It allows us to send different types of jobs through the same queue. Workers can
+- allowing us to send different types of jobs through the same queue. Workers can
   distinguish between actual tasks and shutdown signals.
-- It provides a uniform type (or interface if you are familiar
-  with interfaces in other languages) for our job queue.
-  All items in the queue are of type `Job`, regardless of the closure they contain.
+- providing a uniform type (or interface if you are familiar with interfaces in 
+    other languages) for our job queue. All items in the queue are of type `Job`, 
+    regardless of the closure they contain.
 
 But, why do we use `Box`? The `Box` is crucial here for several reasons:
 
