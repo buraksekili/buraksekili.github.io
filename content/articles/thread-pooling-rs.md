@@ -303,11 +303,10 @@ impl ThreadPool {
     pub fn shutdown(&mut self, timeout: Duration) -> Result<(), ThreadPoolError> {
         let start = Instant::now();
 
-        // Signal all workers to stop
+        // Step 1: Signal all workers to stop
         self.running.store(false, Ordering::SeqCst);
 
-        // Wake up all waiting threads
-        // Wake up all waiting threads
+        // Step 2: Wake up all waiting threads
         let (lock, cvar) = &*self.job_signal;
         match lock.try_lock() {
             Ok(mut job_available) => {
@@ -321,20 +320,20 @@ impl ThreadPool {
             }
         }
 
-        // Step 2: Wait for all workers to finish
+        // Step 3: Wait for all workers to finish
         for worker in &mut self.workers {
             if let Some(thread) = worker.thread.take() {
-                // Step 3: Calculate remaining time
+                // Step 4: Calculate remaining time
                 let remaining = timeout
                     .checked_sub(start.elapsed())
                     .unwrap_or(Duration::ZERO);
 
-                // Step 4: Check if we've exceeded the timeout
+                // Step 5: Check if we've exceeded the timeout
                 if remaining.is_zero() {
                     return Err(ThreadPoolError::ShutdownTimeout);
                 }
 
-                // Step 5: Wait for the worker to finish
+                // Step 6: Wait for the worker to finish
                 if thread.join().is_err() {
                     return Err(ThreadPoolError::ThreadJoinError(format!(
                         "Worker {} failed to join",
@@ -343,7 +342,7 @@ impl ThreadPool {
                 }
             }
         }
-        // Step 6: Final timeout check
+        // Step 7: Final timeout check
         if start.elapsed() > timeout {
             Err(ThreadPoolError::ShutdownTimeout)
         } else {
