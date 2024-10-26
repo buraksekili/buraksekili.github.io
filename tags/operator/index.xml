@@ -6,7 +6,16 @@
     <description>Recent content in Operator on Burak Sekili</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 02 Nov 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://buraksekili.github.io/tags/operator/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 27 Oct 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://buraksekili.github.io/tags/operator/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Kubernetes Client Side Indexing</title>
+      <link>https://buraksekili.github.io/articles/client-k8s-indexing/</link>
+      <pubDate>Sun, 27 Oct 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://buraksekili.github.io/articles/client-k8s-indexing/</guid>
+      <description>Explore the implementation and need for thread pools in Rust</description>
+    </item>
+    
     <item>
       <title>Diving into controller-runtime | Manager</title>
       <link>https://buraksekili.github.io/articles/controller-runtime-1/</link>

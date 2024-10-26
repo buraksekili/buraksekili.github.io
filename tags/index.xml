@@ -6,7 +6,43 @@
     <description>Recent content in Tags on Burak Sekili</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Fri, 06 Sep 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://buraksekili.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 27 Oct 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://buraksekili.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>controller-runtime</title>
+      <link>https://buraksekili.github.io/tags/controller-runtime/</link>
+      <pubDate>Sun, 27 Oct 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://buraksekili.github.io/tags/controller-runtime/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Go</title>
+      <link>https://buraksekili.github.io/tags/go/</link>
+      <pubDate>Sun, 27 Oct 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://buraksekili.github.io/tags/go/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Kubernetes</title>
+      <link>https://buraksekili.github.io/tags/kubernetes/</link>
+      <pubDate>Sun, 27 Oct 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://buraksekili.github.io/tags/kubernetes/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Operator</title>
+      <link>https://buraksekili.github.io/tags/operator/</link>
+      <pubDate>Sun, 27 Oct 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://buraksekili.github.io/tags/operator/</guid>
+      <description></description>
+    </item>
+    
     <item>
       <title>Concurrency</title>
       <link>https://buraksekili.github.io/tags/concurrency/</link>
@@ -26,7 +62,7 @@
     </item>
     
     <item>
-      <title>Serde</title>
+      <title>serde</title>
       <link>https://buraksekili.github.io/tags/serde/</link>
       <pubDate>Fri, 23 Aug 2024 00:00:00 +0000</pubDate>
       
@@ -53,43 +89,7 @@
     </item>
     
     <item>
-      <title>Kubernetes</title>
-      <link>https://buraksekili.github.io/tags/kubernetes/</link>
-      <pubDate>Tue, 13 Aug 2024 00:00:00 +0000</pubDate>
-      
-      <guid>https://buraksekili.github.io/tags/kubernetes/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Go</title>
-      <link>https://buraksekili.github.io/tags/go/</link>
-      <pubDate>Wed, 24 Jan 2024 00:00:00 +0000</pubDate>
-      
-      <guid>https://buraksekili.github.io/tags/go/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Controller-Runtime</title>
-      <link>https://buraksekili.github.io/tags/controller-runtime/</link>
-      <pubDate>Thu, 02 Nov 2023 00:00:00 +0000</pubDate>
-      
-      <guid>https://buraksekili.github.io/tags/controller-runtime/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Operator</title>
-      <link>https://buraksekili.github.io/tags/operator/</link>
-      <pubDate>Thu, 02 Nov 2023 00:00:00 +0000</pubDate>
-      
-      <guid>https://buraksekili.github.io/tags/operator/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Index</title>
+      <title>index</title>
       <link>https://buraksekili.github.io/tags/index/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       

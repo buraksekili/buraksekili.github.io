@@ -21,7 +21,6 @@
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
 <link rel="alternate" type="application/rss+xml" href="https://buraksekili.github.io/articles/index.xml">
-<link rel="alternate" hreflang="en" href="https://buraksekili.github.io/articles/">
 <noscript>
     <style>
         #theme-toggle,
@@ -59,20 +58,17 @@
 
     </style>
 </noscript>
-      <script async src="https://www.googletagmanager.com/gtag/js?id=G-M6ZJTX7HVG"></script>
-      <script>
-        var doNotTrack = false;
-        if ( false ) {
-          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
-          var doNotTrack = (dnt == "1" || dnt == "yes");
-        }
-        if (!doNotTrack) {
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-M6ZJTX7HVG');
-        }
-      </script><meta property="og:title" content="Articles" />
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-M6ZJTX7HVG"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-M6ZJTX7HVG', { 'anonymize_ip': false });
+}
+</script>
+<meta property="og:title" content="Articles" />
 <meta property="og:description" content="" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://buraksekili.github.io/articles/" />
@@ -135,8 +131,6 @@
                         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                     </svg>
                 </button>
-                <ul class="lang-switch"><li>|</li>
-                </ul>
             </div>
         </div>
         <ul id="menu">
@@ -170,13 +164,25 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2>Kubernetes Client Side Indexing
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Kubernetes Client-Side Indexing This post is part of Kubernetes controller development. Check out the first part on Diving into controller-runtime | Manager if you are interested in controller-runtime.
+When working with Kubernetes Operators, read requests (get and list) to the Kubernetes API server are handled by an in-memory cache that is maintained by client-go to reduce the load on your API server. This cache can be enhanced with indexes to retrieve resources more efficiently....</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-10-27 00:00:00 +0000 UTC'>October 27, 2024</span>&nbsp;·&nbsp;15 min&nbsp;·&nbsp;Burak Sekili</footer>
+  <a class="entry-link" aria-label="post link to Kubernetes Client Side Indexing" href="https://buraksekili.github.io/articles/client-k8s-indexing/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2>Thread Pooling in Rust 
     </h2>
   </header>
   <div class="entry-content">
     <p>A thread pool is a software design pattern where a set of worker threads is created to execute tasks concurrently. Instead of creating a new thread for each task, which can be resource-intensive, tasks are submitted to the pool and executed by available worker threads.
-This blog post will go through a simple thread pool implementation - similar to the one in Rust book - with a couple of simple enhancements.
-...</p>
+This blog post will go through a simple thread pool implementation - similar to the one in Rust book - with a couple of simple enhancements....</p>
   </div>
   <footer class="entry-footer"><span title='2024-09-06 00:00:00 +0000 UTC'>September 6, 2024</span>&nbsp;·&nbsp;13 min&nbsp;·&nbsp;Burak Sekili</footer>
   <a class="entry-link" aria-label="post link to Thread Pooling in Rust " href="https://buraksekili.github.io/articles/thread-pooling-rs/"></a>
@@ -189,8 +195,7 @@ This blog post will go through a simple thread pool implementation - similar to 
   </header>
   <div class="entry-content">
     <p>Working with Custom Data Format in Rust using serde If you need to perform serialization or deserialization in Rust, you’ve most likely used the serde before. I’m currently learning Rust, and I found myself needing similar thing.
-To get familiar with the Rust ecosystem, I decided to develop a simple key-value store. Initially, the engine for this key-value store was designed to work with JSON objects, as JSON is a widely-used format that’s straightforward to use with web clients. Also, as most of the languages and platforms already support JSON, it is a good choice to start with.
-...</p>
+To get familiar with the Rust ecosystem, I decided to develop a simple key-value store. Initially, the engine for this key-value store was designed to work with JSON objects, as JSON is a widely-used format that’s straightforward to use with web clients....</p>
   </div>
   <footer class="entry-footer"><span title='2024-08-23 00:00:00 +0000 UTC'>August 23, 2024</span>&nbsp;·&nbsp;16 min&nbsp;·&nbsp;Burak Sekili</footer>
   <a class="entry-link" aria-label="post link to Working with Custom Data Format in Rust using serde" href="https://buraksekili.github.io/articles/rust-serde/"></a>
@@ -202,9 +207,8 @@ To get familiar with the Rust ecosystem, I decided to develop a simple key-value
     </h2>
   </header>
   <div class="entry-content">
-    <p> This guide is a summary of AWS EKS Best practices documentation to help me to skim through some concepts that i usually refer to. For details, please have a look to official EKS docs mentioned on Resources section.
-EKS (Amazon Elastic Kubernetes Service) It manages Kubernetes control-plane on behalf of you, ensures that each cluster has its own control plane. So, as an end-user, you only need to handle your workloads in worker nodes. All control plane related stuff will be handled by AWS.
-...</p>
+    <p>This guide is a summary of AWS EKS Best practices documentation to help me to skim through some concepts that i usually refer to. For details, please have a look to official EKS docs mentioned on Resources section.
+EKS (Amazon Elastic Kubernetes Service) It manages Kubernetes control-plane on behalf of you, ensures that each cluster has its own control plane. So, as an end-user, you only need to handle your workloads in worker nodes....</p>
   </div>
   <footer class="entry-footer"><span title='2024-08-13 00:00:00 +0000 UTC'>August 13, 2024</span>&nbsp;·&nbsp;5 min&nbsp;·&nbsp;Burak Sekili</footer>
   <a class="entry-link" aria-label="post link to Fundamental EKS requirements" href="https://buraksekili.github.io/articles/eks/"></a>
@@ -218,25 +222,18 @@ EKS (Amazon Elastic Kubernetes Service) It manages Kubernetes control-plane on b
   <div class="entry-content">
     <p>Concurrency Channels Unbuffered channel If channel is unbuffered
 1 ch := make(chan struct{}) sending a data to channel will block the goroutine as the channel is nil.
-1 2 3 4 5 6 7 ...</p>
+1 2 3 4 5 6 7 package main func main() { ch := make(chan struct{}) ch &lt;- struct{}{} } Output of this program is:
+1 2 3 4 5 6 7 $ go run main.go fatal error: all goroutines are asleep - deadlock!...</p>
   </div>
   <footer class="entry-footer"><span title='2024-01-24 00:00:00 +0000 UTC'>January 24, 2024</span>&nbsp;·&nbsp;3 min&nbsp;·&nbsp;Burak Sekili</footer>
   <a class="entry-link" aria-label="post link to Concurrency Notes in Go" href="https://buraksekili.github.io/articles/concurrency/"></a>
 </article>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2>Diving into controller-runtime | Manager
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>Introduction controller-runtime package has become a fundamental tool for most Kubernetes controllers, simplifying the creation of controllers to manage resources within a Kubernetes environment efficiently. Users tend to prefer it over client-go.
-The increased adoption of projects like Kubebuilder or Operator SDK has facilitated the creation of Kubernetes Operator projects. Users need to implement minimal requirements to start with Kubernetes controllers, thanks to these projects.
-...</p>
-  </div>
-  <footer class="entry-footer"><span title='2023-11-02 00:00:00 +0000 UTC'>November 2, 2023</span>&nbsp;·&nbsp;9 min&nbsp;·&nbsp;Burak Sekili</footer>
-  <a class="entry-link" aria-label="post link to Diving into controller-runtime | Manager" href="https://buraksekili.github.io/articles/controller-runtime-1/"></a>
-</article>
+<footer class="page-footer">
+  <nav class="pagination">
+    <a class="next" href="https://buraksekili.github.io/articles/page/2/">Next&nbsp;&nbsp;»
+    </a>
+  </nav>
+</footer>
     </main>
     
 <footer class="footer">

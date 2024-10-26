@@ -1,12 +1,21 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
-    <title>Controller-Runtime on Burak Sekili</title>
+    <title>controller-runtime on Burak Sekili</title>
     <link>https://buraksekili.github.io/tags/controller-runtime/</link>
-    <description>Recent content in Controller-Runtime on Burak Sekili</description>
+    <description>Recent content in controller-runtime on Burak Sekili</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Thu, 02 Nov 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://buraksekili.github.io/tags/controller-runtime/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 27 Oct 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://buraksekili.github.io/tags/controller-runtime/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Kubernetes Client Side Indexing</title>
+      <link>https://buraksekili.github.io/articles/client-k8s-indexing/</link>
+      <pubDate>Sun, 27 Oct 2024 00:00:00 +0000</pubDate>
+      
+      <guid>https://buraksekili.github.io/articles/client-k8s-indexing/</guid>
+      <description>Explore the implementation and need for thread pools in Rust</description>
+    </item>
+    
     <item>
       <title>Diving into controller-runtime | Manager</title>
       <link>https://buraksekili.github.io/articles/controller-runtime-1/</link>

@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Kubernetes Client Side Indexing | Burak Sekili</title>
+<meta name="keywords" content="Go, Kubernetes, Operator, controller-runtime">
+<meta name="description" content="Explore the implementation and need for thread pools in Rust">
+<meta name="author" content="Burak Sekili">
+<link rel="canonical" href="https://buraksekili.github.io/articles/client-k8s-indexing/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.402aea8fcb16ea8922c350ac4593eaa9cc13e6c01b2c0f5fc06b1c73f528c213.css" integrity="sha256-QCrqj8sW6okiw1CsRZPqqcwT5sAbLA9fwGscc/UowhM=" rel="preload stylesheet" as="style">
+
+<link rel="stylesheet" href="css/extended/custom.css">
+<link rel="icon" href="https://buraksekili.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://buraksekili.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://buraksekili.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://buraksekili.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://buraksekili.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --hljs-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-M6ZJTX7HVG"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-M6ZJTX7HVG', { 'anonymize_ip': false });
+}
+</script>
+<meta property="og:title" content="Kubernetes Client Side Indexing" />
+<meta property="og:description" content="Explore the implementation and need for thread pools in Rust" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://buraksekili.github.io/articles/client-k8s-indexing/" /><meta property="article:section" content="articles" />
+<meta property="article:published_time" content="2024-10-27T00:00:00+00:00" />
+<meta property="article:modified_time" content="2024-10-27T02:22:19+03:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Kubernetes Client Side Indexing"/>
+<meta name="twitter:description" content="Explore the implementation and need for thread pools in Rust"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Articles",
+      "item": "https://buraksekili.github.io/articles/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Kubernetes Client Side Indexing",
+      "item": "https://buraksekili.github.io/articles/client-k8s-indexing/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Kubernetes Client Side Indexing",
+  "name": "Kubernetes Client Side Indexing",
+  "description": "Explore the implementation and need for thread pools in Rust",
+  "keywords": [
+    "Go", "Kubernetes", "Operator", "controller-runtime"
+  ],
+  "articleBody": "Kubernetes Client-Side Indexing This post is part of Kubernetes controller development. Check out the first part on Diving into controller-runtime | Manager if you are interested in controller-runtime.\nWhen working with Kubernetes Operators, read requests (get and list) to the Kubernetes API server are handled by an in-memory cache that is maintained by client-go to reduce the load on your API server. This cache can be enhanced with indexes to retrieve resources more efficiently.\nThis post explains the underlying indexing implementation in controller-runtime (and in client-go). We’ll explore how indexing works under the hood in these Kubernetes client libraries.\nIf you’re interested in practical examples of indexing, the Kubebuilder book and controller-runtime package documentation provide great practical examples and implementations.\nPurpose of Indexing Indexing in Kubernetes client libraries (client-go and controller-runtime) optimizes the performance of Kubernetes controllers by enabling efficient lookups of cached objects based on specific attributes or relationships. This is crucial for:\nEfficient Resource Retrieval: Finding resources matching certain criteria without scanning the entire cache. This is particularly useful when managing resources that depend on other resources.\nReduced API Server Load: Minimizing the number of API calls to the Kubernetes API server through caching. Most modern Kubernetes Operators utilize controller-runtime, where this behavior comes by default.\nResponsive Reconciliation: Enabling controllers to react to changes in related resources. This allows you to reconcile specific resources based on changes in their dependencies.\nLet’s explore these concepts through an example.\nScenario We’ll examine a simplified version of an example from the Kubebuilder book.\nNote: We’ll use controller-runtime in our examples. For general information about Kubernetes Operators and controller-runtime, please refer to my previous post.\nConsider a Custom Resource Definition (CRD) called MyApp that deploys your application on Kubernetes and uses a ConfigMap for application-specific configurations.\nThe MyApp spec references a ConfigMap which includes MyApp specific configuration. The MyApp controller reconciles the desired state based on the following MyApp custom resource:\n1 2 3 4 5 6 7 8 apiVersion: my.domain/v1alpha1 kind: MyApp metadata: name: myapp-staging spec: config: configMapRef: name: \"myapp-staging-conf\" When a ConfigMap specified via spec.config.configMapRef.name is updated, MyApp should reflect those changes. To achieve this, MyApp needs to watch ConfigMap resources.\nA basic initialization of the MyApp controller looks like this:\n1 2 3 ctrl.NewControllerManagedBy(mgr). For(\u0026v1alpha1.MyApp{}). Owns(\u0026corev1.ConfigMap{}) Here, the controller manages MyApp CR as the primary resource and ConfigMap as a secondary resource. The controller will reconcile on both MyApp CR and ConfigMap events (e.g., updates to either resource).\nWhile this approach works, its efficiency is arguable since the controller will reconcile on every change to MyApp and ConfigMap resources. For example, changes to ConfigMaps unrelated to MyApp configuration will trigger reconciliation. Since reconciliation logic is often costly, involving external API calls or write requests to the Kubernetes API, we should avoid unnecessary reconciliations.\nThere are various ways to filter reconciliation requests, but the idiomatic approach uses Predicates and Event handlers. Since I covered these in previous blog post, we’ll focus on scenarios where indexing is crucial.\nConsider three MyApp instances:\n1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 apiVersion: my.domain/v1alpha1 kind: MyApp metadata: name: myapp-staging1 spec: config: configMapRef: name: \"myapp-staging-conf\" --- apiVersion: my.domain/v1alpha1 kind: MyApp metadata: name: myapp-staging2 spec: config: configMapRef: name: \"myapp-staging-conf\" --- apiVersion: my.domain/v1alpha1 kind: MyApp metadata: name: myapp-dev spec: config: configMapRef: name: \"myapp-dev-conf\" Here, myapp-staging1 and myapp-staging2 use a ConfigMap called myapp-staging-conf, while myapp-dev uses myapp-dev-conf.\nIn our reconciler, when a ConfigMap is updated, we want to update only the MyApp instances that use that particular ConfigMap. This is where indexing becomes handy, allowing us to somehow correlate MyApp instances with their corresponding ConfigMaps.\nIndexing Implementation To find dependent MyApp instances, we need to find all MyApp instances using a particular ConfigMap. For example, when myapp-staging-conf is updated, we want to trigger reconciliation for both myapp-staging1 and myapp-staging2.\nTo achieve that, we will add an index to the MyApp custom resource containing the name of its associated ConfigMap. This enables efficient retrieval of MyApp resources through this index.\nIn controller-runtime, indexers are configured through the Cache interface, which provides methods to index and retrieve Kubernetes objects efficiently. The cache wraps client-go informers and provides additional capabilities, including indexing.\nWhen creating a new manager with ctrl.NewManager(), it initializes a cache (cache.Cache) to hold informers and indexers.\nBefore starting the manager, add indexers via the FieldIndexer:\n1 2 3 4 5 6 7 8 9 10 mgr.GetFieldIndexer().IndexField( context.Background(), \u0026v1alpha1.MyApp{}, \"spec.config.configMapRef.name\", // Can be any string, not limited to field names func(obj client.Object) []string { myApp := obj.(*v1alpha1.MyApp) cmName := myApp.Spec.Config.ConfigMapRef.Name return []string{cmName} }, ) This indexes MyApp resources based on the myApp.Spec.Config.ConfigMapRef.Name field. When mgr.Start() is called, the cache initializes all informers and configures the indexers.\nIn the reconciler, we can use controller-runtime client with indexing capabilities to efficiently query objects:\n1 2 3 4 5 6 myAppList := \u0026v1alpha1.MyAppList{} listOps := \u0026client.ListOptions{ FieldSelector: fields.OneTermEqualSelector(\"spec.config.configMapRef.name\", \"myapp-staging-conf\"), } r.List(ctx, myAppList, listOps) This lists all MyApp resources that use the ConfigMap “myapp-staging-conf”. The Kubernetes client searches the cache using the index key “spec.config.configMapRef.name”.\nFinishing the Controller initialization Now that we can list MyApp resources based on their associated ConfigMap, we can avoid unnecessary reconciliations. For example, when myapp-staging-conf is updated, we don’t need to reconcile the myapp-dev resource since it uses a different ConfigMap.\n1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 ctrl.NewControllerManagedBy(mgr). For(\u0026v1alpha1.MyApp{}). Watches( \u0026corev1.ConfigMap{}, handler.EnqueueRequestsFromMapFunc( func(ctx context.Context, configMap client.Object) []reconcile.Request { myAppList := \u0026v1alpha1.MyAppList{} listOps := \u0026client.ListOptions{ FieldSelector: fields.OneTermEqualSelector( \"spec.config.configMapRef.name\", configMap.GetName(), ), } if err := r.List(ctx, myAppList, listOps); err != nil { return []reconcile.Request{} } requests := make([]reconcile.Request, len(myAppList.Items)) for i := range myAppList.Items { requests[i] = reconcile.Request{ NamespacedName: types.NamespacedName{ Name: myAppList.Items[i].Name, Namespace: myAppList.Items[i].Namespace, }, } } return requests }), builder.WithPredicates(predicate.NewPredicateFuncs( func(object client.Object) bool { // No ConfigMap filtering currently. // Add predicate functions here to filter ConfigMaps // For example, consider ConfigMaps with specific // annotations like `myapp/config` // The Enqueue function runs based on this return value return true }), ), ). Complete(r) Instead of owning all ConfigMap resources, the controller now watches ConfigMaps. With the help of predicate functions, we can filter ConfigMap resources events before enqueuing MyApp resources for reconciliation. After passing predicates, we specify which MyApp resources to reconcile within EnqueueRequestsFromMapFunc. Using our index, we can find MyApp instances using the updated ConfigMap, ensuring efficient reconciliation of only the relevant resources.\nHow While previous sections covered how to use controller-runtime for indexing resources, this section explores the underlying implementation details.\nKubernetes contains well-structured code patterns, and indexing is one of them. Although we used controller-runtime in our examples, it leverages client-go under the hood to handle the actual indexing operations.\nLet’s examine the implementation details that make indexing possible. While I can’t cover every implementation detail, we’ll focus on the most interesting aspects of controller-runtime and client-go’s indexing mechanisms.\nManager and Cache Setup The first step is instantiating a Manager from controller-runtime to handle the MyApp controller and its dependencies. We’ll use NewManager from controller-runtime/pkg/manager for manager instantiation.\nIf you’re new to Manager or want to understand its role in depth, check out my post on Diving into controller-runtime | Manager.\nAlthough Manager offers various configuration options, I’ll focus on the cache configuration, specifically the NewCache option. We typically use the default cache configuration for NewCache since it is a low-level primitive that rarely needs customization except in specific use cases. This is already mentioned in the docs, as follows:\n1 2 3 4 5 6 7 8 9 // NewCache is the function that will create the cache to be used // by the manager. If not set this will use the default new cache function. // // When using a custom NewCache, the Cache options will be passed to the // NewCache function. // // NOTE: LOW LEVEL PRIMITIVE! // Only use a custom NewCache if you know what you are doing. NewCache cache.NewCacheFunc By default, NewCache instantiates an informerCache instance from controller-runtime that uses NewSharedIndexInformer informer from client-go. The exception is when multi-namespace is configured for cache, in which case multiNamespaceCache from controller-runtime is used.\nIndex Field Implementation Now, our cache is instantiated and attached to Manager. What happens when we run following code piece to create an indexer for us?\n1 2 3 4 5 6 7 8 9 10 mgr.GetFieldIndexer().IndexField( context.Background(), \u0026pkg.MyApp{}, \"spec.config.configMapRef.name\", func(obj client.Object) []string { myApp := obj.(*pkg.MyApp) cmName := myApp.Spec.Config.ConfigMapRef.Name return []string{cmName} }, ) The function passed into IndexField will be referred as F later in the post.\nThe FieldIndexer here is the informerCache that we created while setting up the Manager, as mentioned above.\nIndexField gets informer of the given object, in our case MyAp, indexing key (spec.config.configMapRef.name), and a function F. In F, if you notice, we did not specify the namespace of the ConfigMap as it will be handled automatically by the controller-runtime under the hood.\ncontroller-runtime takes F and uses it in indexByField function (reference: here) and generates both namespaced and cluster-scoped variants of the extracted values.\nAll of these operations are wrapped in an anonymous function. This anonymous function actually runs F to get extracted values from each MyApp resources. The result of F will then be translated into special indexed value(s) as follows:\n__all_namespaces/ / if resource (MyApp) is namespaced. In our case, since MyApp is namespaced resource (not cluster scoped resource such as ClusterRole), controller-runtime adds namespace for us. It also creates a special value with __all_namespaces/ prefix for our index key (spec.config.configMapRef.name) in order to allow listing regardless of the object namespace in cache.\nThen this anonymous function that wraps F is going to be passed into informer through adding an Indexer to the MyApp’s informer.\nUnderstanding Indexers and Indices We mentioned adding an Indexer to an informer but what is Indexer? What does it look like?\nIndexer is actual core component used in indexing logic. It keeps track of Indexer names and functions used to calculate indexed values, such as our F. Indexer names have a special format as field:. So, our indexer name is going to be field:spec.config.configMapRef.name.\nIndexer and other related types are defined in client-go, as follows:\n1 2 3 4 5 6 7 8 9 10 11 // IndexFunc returns indexed values for objects, // such as ConfigMap names for MyApp resources like anonymous // function (that wraps F) mentioned above. type IndexFunc func(obj interface{}) ([]string, error) // Indexers maintain indexer names as keys and // their corresponding calculation functions as value. type Indexers map[string]IndexFunc // Indices stores the actual index data for each registered Indexer name. type Indices map[string]Index type Index map[string]sets.String For example, when we create a custom indexer named spec.config.configMapRef.name by calling IndexField, client-go adds it to the indexer with a special format:\nIndexers[field:spec.config.configMapRef.name]= Indices=nil Since we do not have any actual resource created at the time we call IndexField function, Indices is not yet populated; thus, nil.\nFor Indices and Index, assume that we already have a MyApp instance called myapptest.\nIndices will contain all indexes for the particular indexer. For our custom indexer field:spec.config.configMapRef.name, Indices is going to look like\n\"field:spec.config.configMapRef.name\" -\u003e set(\"default/myapptest\", \"__all_namespaces/myapptest\") It contains all indexes calculated by the indexer called field:spec.config.configMapRef.name.\nCache Implementation Details Back to our actual work, recall that the anonymous function wrapping F needs to be passed to the informer by adding an Indexer to the MyApp’s informer. controller-runtime handles this here.\nThe MyApp’s Informer (of type sharedIndexInformer) takes this request and passes it to its indexer indexer field, which implements the Indexer interface.\nThe indexer field is implemented by cache that has a core field called cacheStorage serving as as the actual storage of the client-go cache. It implements ThreadSafeStore interface. Specifically, it uses threadSafeMap implementation.\nthreadSafeMap implementation uses items (map[string]interface{}) for objects in the cache, and index field which is a type of storeIndex.\n1 2 3 4 5 6 7 8 9 10 11 type threadSafeMap struct { lock sync.RWMutex items map[string]interface{} index *storeIndex } // storeIndex implements the indexing functionality for Store interface type storeIndex struct { indexers Indexers indices Indices } The Indexers and Indices we discussed earlier are implemented here in the client-go cache.\nIndexer in action With the indexer registered, let’s create an instance of MyApp CR and examine what happens.\nWhen creating a MyApp instance, processDelta function handles cache updates; either removes or updates keys from the cache.\nSince the cache in client-go uses threadSafeMap, it checks our object in its storage using the object’s key. The key is generated by MetaNamespaceKeyFunc, with / format.\nSince we are creating the resource for the first time, this key does not exist in the cache (specifially in threadSafeMap). That’s why, client-go adds the object (MyApp instance) to its cache.\nclient-go updates underlying cache storage (threadSafeMap) by inserting the object into the key.\nkey: default/myapp-staging1 value: *pkg.MyApp At the moment, we have two indexers: the default “namespace” indexer that works with / metadata of objects, and our custom indexer called “field:spec.config.configMapRef.name”. client-go iterates through these indexers and updates them one by one.\nThe cool part here is that client-go actually runs Update method under the hood, as follows:\n1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 // First we call Add, where key: default/myapp-staging1 and value is the actual // MyApp resource instance. func (c *threadSafeMap) Add(key string, obj interface{}) { c.Update(key, obj) } // Then Update method is called by Add method. It checks for the given key on // the threadSafeMap (which is an actual storage used in client-go cache) items. // And runs updateIndices. func (c *threadSafeMap) Update(key string, obj interface{}) { c.lock.Lock() defer c.lock.Unlock() oldObject := c.items[key] c.items[key] = obj c.index.updateIndices(oldObject, obj, key) } // This doc is directly taken from client-go code. // // updateIndices modifies the objects location in the managed indexes: // - for create you must provide only the newObj // - for update you must provide both the oldObj and the newObj // - for delete you must provide only the oldObj // updateIndices must be called from a function that already has a lock on the cache func (i *storeIndex) updateIndices(oldObj interface{}, newObj interface{}, key string) { for name := range i.indexers { i.updateSingleIndex(name, oldObj, newObj, key) } } Based on the oldObj and newObj values, updateSingleIndex determines which keys need to be added to or removed from the index of the given indexer.\nThe index update process follows this pattern:\n1 2 3 4 5 6 7 8 9 10 11 12 objectKey := \"default/myapp-staging1\" indexerName := \"field:spec.config.configMapRef.name\" index := threadSafeMap.index.Indices[indexerName] // set corresponds to Set that contains all MyApp // resources that use myapp-staging-conf ConfigMap. set := index[\"__all_namespaces/myapp-staging-conf\"] if myAppListUsingSpecificConfigMap == nil { set = sets.String{} index[\"__all_namespaces/myapp-staging-conf\"] = set } set.Insert(objectKey) Using the Indexer When we call r.List(), controller-runtime checks if the object is uncached (or unstructured). In our case, the objects are cached, controller-runtime client tries to List all MyApp instances from the cache, as follows:\n1 return c.cache.List(ctx, obj, opts...) As we initialized informerCache (recall Manager setup), controller-runtime client calls informerCache’s List method (defined here). Now, in informerCache’s List method, we first get MyApp object’s informer. If the informer has started, we try to run List method on MyApp informer’s cache, which delegates operation to client-go.\nRecall the following code piece:\n1 2 3 4 5 6 7 8 myAppList := \u0026pkg.MyAppList{} listOps := \u0026client.ListOptions{ FieldSelector: fields.OneTermEqualSelector( \"spec.config.configMapRef.name\", \"myapp-staging-conf\", ), } r.List(ctx, myAppList, listOps) In the list options passed to r.List, we specified our indexer key. When using a FieldSelector, the cache requires an exact match for the selector. Then, controller-runtime goes through each Indexers (in ourcase we have two, one field:spec.config.configMapRef.name and namespace one.)\nSince we haven’t specified a Namespace in ListOpts, controller-runtime will look for the __all_namespaces/myapp-staging-conf indexed value in the index called field:spec.config.configMapRef.name.\n- indexName: \"field:spec.config.configMapRef.name\" indexName is derived from ListOptions - indexedValue: \"spec.config.configMapRef.name\" indexedValue is derived from ListOptions After getting this informations, controller-runtime actually forwards our request to client-go’s Indexer interface’s ByIndex method which is documented as follows:\n1 2 3 // ByIndex returns the stored objects whose set of indexed values // for the named index includes the given indexed value ByIndex(indexName, indexedValue string) ([]interface{}, error) Remember how we call this client-go method from controller-runtime\n1 objs, err = indexer.ByIndex(\"field:spec.config.configMapRef.name\", \"__all_namespaces/myapp-staging-conf\") Based on its documentation, ByIndex looks for stored objects for key “__all_namespaces/myapp-staging-conf” in the index of “field:spec.config.configMapRef.name” indexer\nThis may sound complicated but to simplify this flow, let’s re iterate through the following types:\n1 2 3 4 5 6 7 8 9 10 11 12 13 // the key is indexer's name, such as \"field:spec.config.configMapRef.name\" // the value is IndexFunc, such as the anonymous function mentioned previously. type Indexer map[string]IndexFunc // the key is indexer's name, such as \"field:spec.config.configMapRef.name\" // the value is Index type Indices map[string]Index // the key is indexed value, such as __all_namespaces/myapp-staging-conf // the value is set of strings that corresponds to // / metadata of the objects. // For ex, default/myapp-staging1 type Index map[string]sets.String Now, we have set including / metadata of the MyApp resources. Then, threadSafeMap converts this Set to a list, and List operation is done by using the indexing functionality that we added.\nConclusion Throughout this post, we’ve walked through Kubernetes client-side indexing, exploring both its practical use and internal workings. While this post shares one approach to using indexing for improving controller performance, there are many other patterns and best practices in the Kubernetes ecosystem that might better suit your specific needs.\nIf you’re interested in learning more about controller development, you might find my earlier post about Controller Runtime Manager helpful, where I shared my experience with the core components of controllers. The Kubebuilder documentation is also an excellent resource that provides more comprehensive examples and different indexing use cases.\nI hope sharing these experiences with client-side indexing has been helpful for your journey :) Every controller and operator has unique requirements, and I’d be interested to hear about your approaches to similar challenges. Feel free to share your thoughts or ask questions about implementing indexing in your controllers.\nIf you notice any mistakes or have feedback, feel free to reach out to me on Twitter, LinkedIn, or GitHub.\nReferences https://book.kubebuilder.io/ https://pkg.go.dev/sigs.k8s.io/controller-runtime ",
+  "wordCount" : "3094",
+  "inLanguage": "en",
+  "datePublished": "2024-10-27T00:00:00Z",
+  "dateModified": "2024-10-27T02:22:19+03:00",
+  "author":{
+    "@type": "Person",
+    "name": "Burak Sekili"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://buraksekili.github.io/articles/client-k8s-indexing/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Burak Sekili",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://buraksekili.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://buraksekili.github.io/" accesskey="h" title="Burak Sekili (Alt + H)">Burak Sekili</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://buraksekili.github.io/archives/" title="Articles">
+                    <span>Articles</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://buraksekili.github.io/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://buraksekili.github.io/">Home</a>&nbsp;»&nbsp;<a href="https://buraksekili.github.io/articles/">Articles</a></div>
+    <h1 class="post-title">
+      Kubernetes Client Side Indexing
+    </h1>
+    <div class="post-description">
+      Explore the implementation and need for thread pools in Rust
+    </div>
+    <div class="post-meta"><span title='2024-10-27 00:00:00 +0000 UTC'>October 27, 2024</span>&nbsp;·&nbsp;15 min&nbsp;·&nbsp;Burak Sekili
+</div>
+  </header> <div class="toc">
+    <details  open>
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#kubernetes-client-side-indexing" aria-label="Kubernetes Client-Side Indexing">Kubernetes Client-Side Indexing</a><ul>
+                        
+                <li>
+                    <a href="#purpose-of-indexing" aria-label="Purpose of Indexing">Purpose of Indexing</a></li>
+                <li>
+                    <a href="#scenario" aria-label="Scenario">Scenario</a><ul>
+                        
+                <li>
+                    <a href="#indexing-implementation" aria-label="Indexing Implementation">Indexing Implementation</a></li>
+                <li>
+                    <a href="#finishing-the-controller-initialization" aria-label="Finishing the Controller initialization">Finishing the Controller initialization</a></li></ul>
+                </li>
+                <li>
+                    <a href="#how" aria-label="How">How</a></li>
+                <li>
+                    <a href="#manager-and-cache-setup" aria-label="Manager and Cache Setup">Manager and Cache Setup</a></li>
+                <li>
+                    <a href="#index-field-implementation" aria-label="Index Field Implementation">Index Field Implementation</a></li>
+                <li>
+                    <a href="#understanding-indexers-and-indices" aria-label="Understanding Indexers and Indices">Understanding Indexers and Indices</a></li>
+                <li>
+                    <a href="#cache-implementation-details" aria-label="Cache Implementation Details">Cache Implementation Details</a></li>
+                <li>
+                    <a href="#indexer-in-action" aria-label="Indexer in action">Indexer in action</a></li>
+                <li>
+                    <a href="#using-the-indexer" aria-label="Using the Indexer">Using the Indexer</a></li></ul>
+                </li>
+                <li>
+                    <a href="#conclusion" aria-label="Conclusion">Conclusion</a></li>
+                <li>
+                    <a href="#references" aria-label="References">References</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h2 id="kubernetes-client-side-indexing">Kubernetes Client-Side Indexing<a hidden class="anchor" aria-hidden="true" href="#kubernetes-client-side-indexing">#</a></h2>
+<blockquote>
+<p>This post is part of Kubernetes controller development.
+Check out the first part on <a href="../controller-runtime-1">Diving into controller-runtime | Manager</a> if you are interested in controller-runtime.</p>
+</blockquote>
+<p>When working with Kubernetes Operators, read requests (get and list) to the Kubernetes API server are handled by an in-memory cache that is maintained by client-go to reduce the load on your API server. This cache can be enhanced with indexes to retrieve resources more efficiently.</p>
+<p>This post explains the underlying indexing implementation in controller-runtime (and in client-go). We&rsquo;ll explore how indexing works under the hood in these Kubernetes client libraries.</p>
+<p>If you&rsquo;re interested in practical examples of indexing, the Kubebuilder book and controller-runtime package documentation provide great practical examples and implementations.</p>
+<h3 id="purpose-of-indexing">Purpose of Indexing<a hidden class="anchor" aria-hidden="true" href="#purpose-of-indexing">#</a></h3>
+<p>Indexing in Kubernetes client libraries (client-go and controller-runtime) optimizes the performance of Kubernetes controllers by enabling efficient lookups of cached objects based on specific attributes or relationships. This is crucial for:</p>
+<ol>
+<li>
+<p>Efficient Resource Retrieval: Finding resources matching certain criteria without scanning the entire cache. This is particularly useful when managing resources that depend on other resources.</p>
+</li>
+<li>
+<p>Reduced API Server Load: Minimizing the number of API calls to the Kubernetes API server through caching. Most modern Kubernetes Operators utilize controller-runtime, where this behavior comes by default.</p>
+</li>
+<li>
+<p>Responsive Reconciliation: Enabling controllers to react to changes in related resources. This allows you to reconcile specific resources based on changes in their dependencies.</p>
+</li>
+</ol>
+<p>Let&rsquo;s explore these concepts through an example.</p>
+<h3 id="scenario">Scenario<a hidden class="anchor" aria-hidden="true" href="#scenario">#</a></h3>
+<p>We&rsquo;ll examine a simplified version of an example from the Kubebuilder book.</p>
+<blockquote>
+<p>Note: We&rsquo;ll use controller-runtime in our examples. For general information about Kubernetes Operators and controller-runtime, please refer to my previous post.</p>
+</blockquote>
+<p>Consider a Custom Resource Definition (CRD) called MyApp that deploys your application on Kubernetes and uses a ConfigMap for application-specific configurations.</p>
+<p>The MyApp spec references a ConfigMap which includes MyApp specific configuration.
+The MyApp controller reconciles the desired state based on the following MyApp custom resource:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">my.domain/v1alpha1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">MyApp</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">metadata</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">myapp-staging</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">spec</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">config</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">configMapRef</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;myapp-staging-conf&#34;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>When a ConfigMap specified via <code>spec.config.configMapRef.name</code> is updated, MyApp should reflect those changes. To achieve this, MyApp needs to watch ConfigMap resources.</p>
+<p>A basic initialization of the MyApp controller looks like this:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="nx">ctrl</span><span class="p">.</span><span class="nf">NewControllerManagedBy</span><span class="p">(</span><span class="nx">mgr</span><span class="p">).</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">For</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">v1alpha1</span><span class="p">.</span><span class="nx">MyApp</span><span class="p">{}).</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">Owns</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">corev1</span><span class="p">.</span><span class="nx">ConfigMap</span><span class="p">{})</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Here, the controller manages MyApp CR as the primary resource and ConfigMap as a secondary resource. The controller will reconcile on both MyApp CR and ConfigMap events (e.g., updates to either resource).</p>
+<p>While this approach works, its efficiency is arguable since the controller will reconcile on every change to MyApp and ConfigMap resources. For example, changes to ConfigMaps unrelated to MyApp configuration will trigger reconciliation. Since reconciliation logic is often costly, involving external API calls or write requests to the Kubernetes API, we should avoid unnecessary reconciliations.</p>
+<p>There are various ways to filter reconciliation requests, but the idiomatic approach uses Predicates and Event handlers. Since I covered these in previous blog post, we&rsquo;ll focus on scenarios where indexing is crucial.</p>
+<p>Consider three MyApp instances:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">my.domain/v1alpha1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">MyApp</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">metadata</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">myapp-staging1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">spec</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">config</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">configMapRef</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;myapp-staging-conf&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nn">---</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">my.domain/v1alpha1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">MyApp</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">metadata</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">myapp-staging2</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">spec</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">config</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">configMapRef</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;myapp-staging-conf&#34;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nn">---</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">my.domain/v1alpha1</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">MyApp</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">metadata</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">myapp-dev</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">spec</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">config</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">configMapRef</span><span class="p">:</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s2">&#34;myapp-dev-conf&#34;</span><span class="w">
+</span></span></span></code></pre></td></tr></table>
+</div>
+</div><p>Here, myapp-staging1 and myapp-staging2 use a ConfigMap called myapp-staging-conf, while myapp-dev uses myapp-dev-conf.</p>
+<p>In our reconciler, when a ConfigMap is updated, we want to update only the MyApp instances that use that particular ConfigMap. This is where indexing becomes handy, allowing us to somehow correlate MyApp instances with their corresponding ConfigMaps.</p>
+<h4 id="indexing-implementation">Indexing Implementation<a hidden class="anchor" aria-hidden="true" href="#indexing-implementation">#</a></h4>
+<p>To find dependent MyApp instances, we need to find all MyApp instances using a particular ConfigMap. For example, when myapp-staging-conf is updated, we want to trigger reconciliation for both myapp-staging1 and myapp-staging2.</p>
+<p>To achieve that, we will add an index to the MyApp custom resource containing the name of its associated ConfigMap. This enables efficient retrieval of MyApp resources through this index.</p>
+<p>In controller-runtime, indexers are configured through the Cache interface, which provides methods to index and retrieve Kubernetes objects efficiently. The cache wraps client-go informers and provides additional capabilities, including indexing.</p>
+<p>When creating a new manager with <code>ctrl.NewManager()</code>, it initializes a cache (<code>cache.Cache</code>) to hold informers and indexers.</p>
+<p>Before starting the manager, add indexers via the <code>FieldIndexer</code>:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="nx">mgr</span><span class="p">.</span><span class="nf">GetFieldIndexer</span><span class="p">().</span><span class="nf">IndexField</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">context</span><span class="p">.</span><span class="nf">Background</span><span class="p">(),</span>
+</span></span><span class="line"><span class="cl">    <span class="o">&amp;</span><span class="nx">v1alpha1</span><span class="p">.</span><span class="nx">MyApp</span><span class="p">{},</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;spec.config.configMapRef.name&#34;</span><span class="p">,</span> <span class="c1">// Can be any string, not limited to field names
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>    <span class="kd">func</span><span class="p">(</span><span class="nx">obj</span> <span class="nx">client</span><span class="p">.</span><span class="nx">Object</span><span class="p">)</span> <span class="p">[]</span><span class="kt">string</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">myApp</span> <span class="o">:=</span> <span class="nx">obj</span><span class="p">.(</span><span class="o">*</span><span class="nx">v1alpha1</span><span class="p">.</span><span class="nx">MyApp</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">cmName</span> <span class="o">:=</span> <span class="nx">myApp</span><span class="p">.</span><span class="nx">Spec</span><span class="p">.</span><span class="nx">Config</span><span class="p">.</span><span class="nx">ConfigMapRef</span><span class="p">.</span><span class="nx">Name</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="nx">cmName</span><span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">},</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>This indexes MyApp resources based on the <code>myApp.Spec.Config.ConfigMapRef.Name</code> field. When <code>mgr.Start()</code> is called, the cache initializes all informers and configures the indexers.</p>
+<p>In the reconciler, we can use controller-runtime client with indexing capabilities to efficiently query objects:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="nx">myAppList</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">v1alpha1</span><span class="p">.</span><span class="nx">MyAppList</span><span class="p">{}</span>
+</span></span><span class="line"><span class="cl"><span class="nx">listOps</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">client</span><span class="p">.</span><span class="nx">ListOptions</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">FieldSelector</span><span class="p">:</span> <span class="nx">fields</span><span class="p">.</span><span class="nf">OneTermEqualSelector</span><span class="p">(</span><span class="s">&#34;spec.config.configMapRef.name&#34;</span><span class="p">,</span> <span class="s">&#34;myapp-staging-conf&#34;</span><span class="p">),</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nx">r</span><span class="p">.</span><span class="nf">List</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">myAppList</span><span class="p">,</span> <span class="nx">listOps</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>This lists all MyApp resources that use the ConfigMap &ldquo;myapp-staging-conf&rdquo;. The Kubernetes client searches the cache using the index key &ldquo;spec.config.configMapRef.name&rdquo;.</p>
+<h4 id="finishing-the-controller-initialization">Finishing the Controller initialization<a hidden class="anchor" aria-hidden="true" href="#finishing-the-controller-initialization">#</a></h4>
+<p>Now that we can list MyApp resources based on their associated ConfigMap, we can avoid unnecessary reconciliations. For example, when myapp-staging-conf is updated, we don&rsquo;t need to reconcile the myapp-dev resource since it uses a different ConfigMap.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="nx">ctrl</span><span class="p">.</span><span class="nf">NewControllerManagedBy</span><span class="p">(</span><span class="nx">mgr</span><span class="p">).</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">For</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">v1alpha1</span><span class="p">.</span><span class="nx">MyApp</span><span class="p">{}).</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">Watches</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="o">&amp;</span><span class="nx">corev1</span><span class="p">.</span><span class="nx">ConfigMap</span><span class="p">{},</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">handler</span><span class="p">.</span><span class="nf">EnqueueRequestsFromMapFunc</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">            <span class="kd">func</span><span class="p">(</span><span class="nx">ctx</span> <span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span> <span class="nx">configMap</span> <span class="nx">client</span><span class="p">.</span><span class="nx">Object</span><span class="p">)</span> <span class="p">[]</span><span class="nx">reconcile</span><span class="p">.</span><span class="nx">Request</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="nx">myAppList</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">v1alpha1</span><span class="p">.</span><span class="nx">MyAppList</span><span class="p">{}</span>
+</span></span><span class="line"><span class="cl">                <span class="nx">listOps</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">client</span><span class="p">.</span><span class="nx">ListOptions</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="nx">FieldSelector</span><span class="p">:</span> <span class="nx">fields</span><span class="p">.</span><span class="nf">OneTermEqualSelector</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">                        <span class="s">&#34;spec.config.configMapRef.name&#34;</span><span class="p">,</span> <span class="nx">configMap</span><span class="p">.</span><span class="nf">GetName</span><span class="p">(),</span>
+</span></span><span class="line"><span class="cl">                    <span class="p">),</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">                <span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">r</span><span class="p">.</span><span class="nf">List</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">myAppList</span><span class="p">,</span> <span class="nx">listOps</span><span class="p">);</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="k">return</span> <span class="p">[]</span><span class="nx">reconcile</span><span class="p">.</span><span class="nx">Request</span><span class="p">{}</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">                <span class="nx">requests</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="nx">reconcile</span><span class="p">.</span><span class="nx">Request</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nx">myAppList</span><span class="p">.</span><span class="nx">Items</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">                <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">myAppList</span><span class="p">.</span><span class="nx">Items</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                    <span class="nx">requests</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="p">=</span> <span class="nx">reconcile</span><span class="p">.</span><span class="nx">Request</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">                        <span class="nx">NamespacedName</span><span class="p">:</span> <span class="nx">types</span><span class="p">.</span><span class="nx">NamespacedName</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">                            <span class="nx">Name</span><span class="p">:</span>      <span class="nx">myAppList</span><span class="p">.</span><span class="nx">Items</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">Name</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                            <span class="nx">Namespace</span><span class="p">:</span> <span class="nx">myAppList</span><span class="p">.</span><span class="nx">Items</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">Namespace</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">                        <span class="p">},</span>
+</span></span><span class="line"><span class="cl">                    <span class="p">}</span>
+</span></span><span class="line"><span class="cl">                <span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">                <span class="k">return</span> <span class="nx">requests</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}),</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">builder</span><span class="p">.</span><span class="nf">WithPredicates</span><span class="p">(</span><span class="nx">predicate</span><span class="p">.</span><span class="nf">NewPredicateFuncs</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">            <span class="kd">func</span><span class="p">(</span><span class="nx">object</span> <span class="nx">client</span><span class="p">.</span><span class="nx">Object</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">                <span class="c1">// No ConfigMap filtering currently.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                <span class="c1">// Add predicate functions here to filter ConfigMaps
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                <span class="c1">// For example, consider ConfigMaps with specific
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                <span class="c1">// annotations like `myapp/config`
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                <span class="c1">// The Enqueue function runs based on this return value
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>                <span class="k">return</span> <span class="kc">true</span>
+</span></span><span class="line"><span class="cl">            <span class="p">}),</span>
+</span></span><span class="line"><span class="cl">        <span class="p">),</span>
+</span></span><span class="line"><span class="cl">    <span class="p">).</span>
+</span></span><span class="line"><span class="cl">    <span class="nf">Complete</span><span class="p">(</span><span class="nx">r</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Instead of owning all ConfigMap resources, the controller now watches ConfigMaps.
+With the help of predicate functions, we can filter ConfigMap resources events before enqueuing MyApp
+resources for reconciliation.
+After passing predicates, we specify which MyApp resources to reconcile within <code>EnqueueRequestsFromMapFunc</code>.
+Using our index, we can find MyApp instances using the updated ConfigMap, ensuring efficient reconciliation of only the relevant resources.</p>
+<h3 id="how">How<a hidden class="anchor" aria-hidden="true" href="#how">#</a></h3>
+<p>While previous sections covered how to use controller-runtime for indexing resources,
+this section explores the underlying implementation details.</p>
+<p>Kubernetes contains well-structured code patterns, and indexing is one of them.
+Although we used controller-runtime in our examples, it leverages client-go under the hood to handle the actual indexing operations.</p>
+<p>Let&rsquo;s examine the implementation details that make indexing possible.
+While I can&rsquo;t cover every implementation detail, we&rsquo;ll focus on the most interesting aspects of controller-runtime and client-go&rsquo;s indexing mechanisms.</p>
+<h3 id="manager-and-cache-setup">Manager and Cache Setup<a hidden class="anchor" aria-hidden="true" href="#manager-and-cache-setup">#</a></h3>
+<p>The first step is instantiating a Manager from controller-runtime to handle the MyApp controller and its dependencies. We&rsquo;ll use <code>NewManager</code> from <a href="https://github.com/kubernetes-sigs/controller-runtime/blob/v0.16.3/pkg/manager/manager.go#L315">controller-runtime/pkg/manager</a> for manager instantiation.</p>
+<blockquote>
+<p>If you&rsquo;re new to Manager or want to understand its role in depth, check out my post on <a href="../controller-runtime-1">Diving into controller-runtime | Manager</a>.</p>
+</blockquote>
+<p>Although Manager offers various configuration options, I&rsquo;ll focus on the cache configuration, specifically the <code>NewCache</code> option.
+We typically use the default cache configuration for NewCache since it is a low-level primitive that rarely needs customization except in specific use cases.
+This is already mentioned in the docs, as follows:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// NewCache is the function that will create the cache to be used
+</span></span></span><span class="line"><span class="cl"><span class="c1">// by the manager. If not set this will use the default new cache function.
+</span></span></span><span class="line"><span class="cl"><span class="c1">//
+</span></span></span><span class="line"><span class="cl"><span class="c1">// When using a custom NewCache, the Cache options will be passed to the
+</span></span></span><span class="line"><span class="cl"><span class="c1">// NewCache function.
+</span></span></span><span class="line"><span class="cl"><span class="c1">//
+</span></span></span><span class="line"><span class="cl"><span class="c1">// NOTE: LOW LEVEL PRIMITIVE!
+</span></span></span><span class="line"><span class="cl"><span class="c1">// Only use a custom NewCache if you know what you are doing.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nx">NewCache</span> <span class="nx">cache</span><span class="p">.</span><span class="nx">NewCacheFunc</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>By default, NewCache instantiates an <code>informerCache</code> instance from controller-runtime that
+uses <code>NewSharedIndexInformer</code> informer from client-go.
+The exception is when multi-namespace is configured for cache, in which case <code>multiNamespaceCache</code> from controller-runtime is used.</p>
+<h3 id="index-field-implementation">Index Field Implementation<a hidden class="anchor" aria-hidden="true" href="#index-field-implementation">#</a></h3>
+<p>Now, our cache is instantiated and attached to Manager. What happens when we run following code piece to create an indexer for us?</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="nx">mgr</span><span class="p">.</span><span class="nf">GetFieldIndexer</span><span class="p">().</span><span class="nf">IndexField</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">context</span><span class="p">.</span><span class="nf">Background</span><span class="p">(),</span>
+</span></span><span class="line"><span class="cl">    <span class="o">&amp;</span><span class="nx">pkg</span><span class="p">.</span><span class="nx">MyApp</span><span class="p">{},</span>
+</span></span><span class="line"><span class="cl">    <span class="s">&#34;spec.config.configMapRef.name&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="kd">func</span><span class="p">(</span><span class="nx">obj</span> <span class="nx">client</span><span class="p">.</span><span class="nx">Object</span><span class="p">)</span> <span class="p">[]</span><span class="kt">string</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">myApp</span> <span class="o">:=</span> <span class="nx">obj</span><span class="p">.(</span><span class="o">*</span><span class="nx">pkg</span><span class="p">.</span><span class="nx">MyApp</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">        <span class="nx">cmName</span> <span class="o">:=</span> <span class="nx">myApp</span><span class="p">.</span><span class="nx">Spec</span><span class="p">.</span><span class="nx">Config</span><span class="p">.</span><span class="nx">ConfigMapRef</span><span class="p">.</span><span class="nx">Name</span>
+</span></span><span class="line"><span class="cl">        <span class="k">return</span> <span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="nx">cmName</span><span class="p">}</span>
+</span></span><span class="line"><span class="cl">    <span class="p">},</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p>The function passed into <code>IndexField</code> will be referred as F later in the post.</p>
+</blockquote>
+<p>The FieldIndexer here is the informerCache that we created while setting up the Manager, as mentioned above.</p>
+<p>IndexField gets informer of the given object, in our case MyAp, indexing key (spec.config.configMapRef.name), and a function F.
+In F, if you notice, we did not specify the namespace of the ConfigMap as it will be handled automatically by the controller-runtime under the hood.</p>
+<p>controller-runtime takes F and uses it in <code>indexByField</code> function (reference: <a href="https://github.com/kubernetes-sigs/controller-runtime/blob/v0.19.1/pkg/cache/informer_cache.go#L223">here</a>)
+and generates both namespaced and cluster-scoped variants of the extracted values.</p>
+<p>All of these operations are wrapped in an
+<a href="https://github.com/kubernetes-sigs/controller-runtime/blob/013f46fbca88cf495a783cdde6dda9ab5c3cd0b9/pkg/cache/informer_cache.go#L224-L257">anonymous function</a>.
+This anonymous function actually runs F to get extracted values from each MyApp resources. The result of F will then be translated into special indexed value(s) as follows:</p>
+<ul>
+<li><code>__all_namespaces/&lt;MyApp.metadata.name&gt;</code></li>
+<li><code>&lt;MyApp.metadata.namespace&gt;/&lt;MyApp.metadata.name&gt;</code> if resource (MyApp) is namespaced.</li>
+</ul>
+<p>In our case, since MyApp is namespaced resource (not cluster scoped resource such as ClusterRole), controller-runtime adds namespace for us.
+It also creates a special value with <code>__all_namespaces/</code> prefix for our index key (spec.config.configMapRef.name) in order to allow listing regardless of the object namespace in cache.</p>
+<p>Then this anonymous function that wraps F is going to be passed into informer through adding an Indexer to the MyApp&rsquo;s informer.</p>
+<h3 id="understanding-indexers-and-indices">Understanding Indexers and Indices<a hidden class="anchor" aria-hidden="true" href="#understanding-indexers-and-indices">#</a></h3>
+<p>We mentioned adding an Indexer to an informer but what is Indexer? What does it look like?</p>
+<p>Indexer is actual core component used in indexing logic. It keeps track of Indexer names and functions used to calculate indexed values, such as our F.
+Indexer names have a special format as <code>field:&lt;indexer_name&gt;</code>. So, our indexer name is going to be <code>field:spec.config.configMapRef.name</code>.</p>
+<p>Indexer and other related types are defined in client-go, as follows:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// IndexFunc returns indexed values for objects,
+</span></span></span><span class="line"><span class="cl"><span class="c1">// such as ConfigMap names for MyApp resources like anonymous
+</span></span></span><span class="line"><span class="cl"><span class="c1">// function (that wraps F) mentioned above.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">type</span> <span class="nx">IndexFunc</span> <span class="kd">func</span><span class="p">(</span><span class="nx">obj</span> <span class="kd">interface</span><span class="p">{})</span> <span class="p">([]</span><span class="kt">string</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="c1">// Indexers maintain indexer names as keys and
+</span></span></span><span class="line"><span class="cl"><span class="c1">// their corresponding calculation functions as value.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">type</span> <span class="nx">Indexers</span> <span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="nx">IndexFunc</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Indices stores the actual index data for each registered Indexer name.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">type</span> <span class="nx">Indices</span> <span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="nx">Index</span>
+</span></span><span class="line"><span class="cl"><span class="kd">type</span> <span class="nx">Index</span> <span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="nx">sets</span><span class="p">.</span><span class="nx">String</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>For example, when we create a custom indexer named <code>spec.config.configMapRef.name</code> by calling IndexField, client-go adds it to the indexer with a special format:</p>
+<pre tabindex="0"><code>Indexers[field:spec.config.configMapRef.name]=&lt;anonymous function generated in controller-runtime&gt;
+Indices=nil
+</code></pre><p>Since we do not have any actual resource created at the time we call IndexField function, Indices is not yet populated; thus, nil.</p>
+<p>For Indices and Index, assume that we already have a MyApp instance called <code>myapptest</code>.</p>
+<p>Indices will contain all indexes for the particular indexer.
+For our custom indexer <code>field:spec.config.configMapRef.name</code>, Indices is going to look like</p>
+<pre tabindex="0"><code>&#34;field:spec.config.configMapRef.name&#34; -&gt; set(&#34;default/myapptest&#34;, &#34;__all_namespaces/myapptest&#34;)
+</code></pre><p>It contains all indexes calculated by the indexer called <code>field:spec.config.configMapRef.name</code>.</p>
+<h3 id="cache-implementation-details">Cache Implementation Details<a hidden class="anchor" aria-hidden="true" href="#cache-implementation-details">#</a></h3>
+<p>Back to our actual work, recall that the anonymous function wrapping F needs to be passed to the informer by adding an Indexer to the MyApp&rsquo;s informer. controller-runtime
+handles this <a href="https://github.com/kubernetes-sigs/controller-runtime/blob/v0.19.1/pkg/cache/informer_cache.go#L259">here</a>.</p>
+<p>The MyApp&rsquo;s Informer (of type sharedIndexInformer) takes this request and passes it to its indexer <a href="https://github.com/kubernetes/client-go/blob/3dc7fd5f4c1d8afaf5924c461eae2ab27db0045a/tools/cache/shared_informer.go#L553">indexer</a> field, which implements the <a href="https://github.com/kubernetes/client-go/blob/3dc7fd5f4c1d8afaf5924c461eae2ab27db0045a/tools/cache/index.go#L35">Indexer</a> interface.</p>
+<p>The indexer field is implemented by <a href="https://github.com/kubernetes/client-go/blob/3dc7fd5f4c1d8afaf5924c461eae2ab27db0045a/tools/cache/store.go#L158">cache</a> that has a core
+field called <code>cacheStorage</code> serving as as the actual storage of the client-go cache. It implements <a href="https://github.com/kubernetes/client-go/blob/3dc7fd5f4c1d8afaf5924c461eae2ab27db0045a/tools/cache/thread_safe_store.go#L41">ThreadSafeStore</a> interface.
+Specifically, it uses <a href="https://github.com/kubernetes/client-go/blob/3dc7fd5f4c1d8afaf5924c461eae2ab27db0045a/tools/cache/thread_safe_store.go#L224">threadSafeMap</a> implementation.</p>
+<p><code>threadSafeMap</code> implementation uses <code>items</code> (map[string]interface{}) for objects in the cache, and
+<code>index</code> field which is a type of <code>storeIndex</code>.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">type</span> <span class="nx">threadSafeMap</span> <span class="kd">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">lock</span>  <span class="nx">sync</span><span class="p">.</span><span class="nx">RWMutex</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">items</span> <span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kd">interface</span><span class="p">{}</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">index</span> <span class="o">*</span><span class="nx">storeIndex</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// storeIndex implements the indexing functionality for Store interface
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">type</span> <span class="nx">storeIndex</span> <span class="kd">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">indexers</span> <span class="nx">Indexers</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">indices</span> <span class="nx">Indices</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>The Indexers and Indices we discussed earlier are implemented here in the client-go cache.</p>
+<h3 id="indexer-in-action">Indexer in action<a hidden class="anchor" aria-hidden="true" href="#indexer-in-action">#</a></h3>
+<p>With the indexer registered, let&rsquo;s create an instance of MyApp CR and examine what happens.</p>
+<p>When creating a MyApp instance, <a href="https://github.com/kubernetes/client-go/blob/3dc7fd5f4c1d8afaf5924c461eae2ab27db0045a/tools/cache/controller.go#L541">processDelta</a> function handles cache updates; either removes or updates keys from the cache.</p>
+<p>Since the cache in client-go uses threadSafeMap, it checks our object in its storage using the object&rsquo;s key. The key is generated by <a href="https://github.com/kubernetes/client-go/blob/v0.31.2/tools/cache/store.go#L108">MetaNamespaceKeyFunc</a>, with <code>&lt;namespace&gt;/&lt;name&gt;</code> format.</p>
+<p>Since we are creating the resource for the first time, this key does not exist in the cache (specifially in threadSafeMap). That&rsquo;s why, client-go adds the object (MyApp instance) to its cache.</p>
+<p>client-go updates underlying cache storage (threadSafeMap) by inserting the object into the key.</p>
+<pre tabindex="0"><code>key: default/myapp-staging1
+value: *pkg.MyApp
+</code></pre><p>At the moment, we have two indexers: the default &ldquo;namespace&rdquo; indexer that works with <code>&lt;namespace&gt;/&lt;name&gt;</code> metadata of objects, and our custom indexer called &ldquo;field:spec.config.configMapRef.name&rdquo;.
+client-go iterates through these indexers
+and updates them one by one.</p>
+<p>The cool part here is that client-go actually runs Update method under the hood, as follows:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// First we call Add, where key: default/myapp-staging1 and value is the actual
+</span></span></span><span class="line"><span class="cl"><span class="c1">// MyApp resource instance.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">threadSafeMap</span><span class="p">)</span> <span class="nf">Add</span><span class="p">(</span><span class="nx">key</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">obj</span> <span class="kd">interface</span><span class="p">{})</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">c</span><span class="p">.</span><span class="nf">Update</span><span class="p">(</span><span class="nx">key</span><span class="p">,</span> <span class="nx">obj</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// Then Update method is called by Add method. It checks for the given key on
+</span></span></span><span class="line"><span class="cl"><span class="c1">// the threadSafeMap (which is an actual storage used in client-go cache) items.
+</span></span></span><span class="line"><span class="cl"><span class="c1">// And runs updateIndices.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">threadSafeMap</span><span class="p">)</span> <span class="nf">Update</span><span class="p">(</span><span class="nx">key</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">obj</span> <span class="kd">interface</span><span class="p">{})</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">c</span><span class="p">.</span><span class="nx">lock</span><span class="p">.</span><span class="nf">Lock</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">	<span class="k">defer</span> <span class="nx">c</span><span class="p">.</span><span class="nx">lock</span><span class="p">.</span><span class="nf">Unlock</span><span class="p">()</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">oldObject</span> <span class="o">:=</span> <span class="nx">c</span><span class="p">.</span><span class="nx">items</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">c</span><span class="p">.</span><span class="nx">items</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span> <span class="p">=</span> <span class="nx">obj</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">c</span><span class="p">.</span><span class="nx">index</span><span class="p">.</span><span class="nf">updateIndices</span><span class="p">(</span><span class="nx">oldObject</span><span class="p">,</span> <span class="nx">obj</span><span class="p">,</span> <span class="nx">key</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// This doc is directly taken from client-go code.
+</span></span></span><span class="line"><span class="cl"><span class="c1">//
+</span></span></span><span class="line"><span class="cl"><span class="c1">// updateIndices modifies the objects location in the managed indexes:
+</span></span></span><span class="line"><span class="cl"><span class="c1">// - for create you must provide only the newObj
+</span></span></span><span class="line"><span class="cl"><span class="c1">// - for update you must provide both the oldObj and the newObj
+</span></span></span><span class="line"><span class="cl"><span class="c1">// - for delete you must provide only the oldObj
+</span></span></span><span class="line"><span class="cl"><span class="c1">// updateIndices must be called from a function that already has a lock on the cache
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">i</span> <span class="o">*</span><span class="nx">storeIndex</span><span class="p">)</span> <span class="nf">updateIndices</span><span class="p">(</span><span class="nx">oldObj</span> <span class="kd">interface</span><span class="p">{},</span> <span class="nx">newObj</span> <span class="kd">interface</span><span class="p">{},</span> <span class="nx">key</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="k">for</span> <span class="nx">name</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">i</span><span class="p">.</span><span class="nx">indexers</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">i</span><span class="p">.</span><span class="nf">updateSingleIndex</span><span class="p">(</span><span class="nx">name</span><span class="p">,</span> <span class="nx">oldObj</span><span class="p">,</span> <span class="nx">newObj</span><span class="p">,</span> <span class="nx">key</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Based on the oldObj and newObj values, updateSingleIndex determines which keys need to be added to or removed from the index of the given indexer.</p>
+<p>The index update process follows this pattern:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="nx">objectKey</span> <span class="o">:=</span> <span class="s">&#34;default/myapp-staging1&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nx">indexerName</span> <span class="o">:=</span> <span class="s">&#34;field:spec.config.configMapRef.name&#34;</span>
+</span></span><span class="line"><span class="cl"><span class="nx">index</span> <span class="o">:=</span> <span class="nx">threadSafeMap</span><span class="p">.</span><span class="nx">index</span><span class="p">.</span><span class="nx">Indices</span><span class="p">[</span><span class="nx">indexerName</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// set corresponds to Set that contains all MyApp
+</span></span></span><span class="line"><span class="cl"><span class="c1">// resources that use myapp-staging-conf ConfigMap.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nx">set</span> <span class="o">:=</span> <span class="nx">index</span><span class="p">[</span><span class="s">&#34;__all_namespaces/myapp-staging-conf&#34;</span><span class="p">]</span>
+</span></span><span class="line"><span class="cl"><span class="k">if</span> <span class="nx">myAppListUsingSpecificConfigMap</span> <span class="o">==</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">set</span> <span class="p">=</span> <span class="nx">sets</span><span class="p">.</span><span class="nx">String</span><span class="p">{}</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">index</span><span class="p">[</span><span class="s">&#34;__all_namespaces/myapp-staging-conf&#34;</span><span class="p">]</span> <span class="p">=</span> <span class="nx">set</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="nx">set</span><span class="p">.</span><span class="nf">Insert</span><span class="p">(</span><span class="nx">objectKey</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="using-the-indexer">Using the Indexer<a hidden class="anchor" aria-hidden="true" href="#using-the-indexer">#</a></h3>
+<p>When we call <code>r.List()</code>, controller-runtime checks if the object is uncached (or unstructured).
+In our case, the objects are cached, controller-runtime client tries to List all MyApp
+instances from the cache, as follows:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="k">return</span> <span class="nx">c</span><span class="p">.</span><span class="nx">cache</span><span class="p">.</span><span class="nf">List</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">obj</span><span class="p">,</span> <span class="nx">opts</span><span class="o">...</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>As we initialized informerCache (recall Manager setup), controller-runtime client calls informerCache&rsquo;s List method (defined <a href="https://github.com/kubernetes-sigs/controller-runtime/blob/v0.19.1/pkg/cache/informer_cache.go#L91-L108">here</a>).
+Now, in informerCache&rsquo;s List method, we first get MyApp object&rsquo;s informer.
+If the informer has started, we try to run List method on MyApp informer&rsquo;s cache, which delegates
+operation to client-go.</p>
+<p>Recall the following code piece:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="nx">myAppList</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">pkg</span><span class="p">.</span><span class="nx">MyAppList</span><span class="p">{}</span>
+</span></span><span class="line"><span class="cl"><span class="nx">listOps</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">client</span><span class="p">.</span><span class="nx">ListOptions</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nx">FieldSelector</span><span class="p">:</span> <span class="nx">fields</span><span class="p">.</span><span class="nf">OneTermEqualSelector</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">        <span class="s">&#34;spec.config.configMapRef.name&#34;</span><span class="p">,</span> <span class="s">&#34;myapp-staging-conf&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="p">),</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="nx">r</span><span class="p">.</span><span class="nf">List</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">myAppList</span><span class="p">,</span> <span class="nx">listOps</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>In the list options passed to <code>r.List</code>, we specified our indexer key. When using a FieldSelector, the cache requires an exact match for the selector.
+Then, controller-runtime goes through each Indexers (in ourcase we have two, one <code>field:spec.config.configMapRef.name</code> and <code>namespace</code> one.)</p>
+<p>Since we haven&rsquo;t specified a Namespace in ListOpts, controller-runtime will look for the <code>__all_namespaces/myapp-staging-conf</code> indexed value
+in the index called <code>field:spec.config.configMapRef.name</code>.</p>
+<pre tabindex="0"><code>- indexName: &#34;field:spec.config.configMapRef.name&#34;
+indexName is derived from ListOptions
+
+- indexedValue: &#34;spec.config.configMapRef.name&#34;
+indexedValue is derived from ListOptions
+</code></pre><p>After getting this informations, controller-runtime actually forwards our request to client-go&rsquo;s
+Indexer interface&rsquo;s <a href="https://github.com/kubernetes/client-go/blob/v0.31.2/tools/cache/index.go#L47-L49">ByIndex</a> method which is documented as follows:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// ByIndex returns the stored objects whose set of indexed values
+</span></span></span><span class="line"><span class="cl"><span class="c1">// for the named index includes the given indexed value
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nf">ByIndex</span><span class="p">(</span><span class="nx">indexName</span><span class="p">,</span> <span class="nx">indexedValue</span> <span class="kt">string</span><span class="p">)</span> <span class="p">([]</span><span class="kd">interface</span><span class="p">{},</span> <span class="kt">error</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Remember how we call this client-go method from controller-runtime</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="nx">objs</span><span class="p">,</span> <span class="nx">err</span> <span class="p">=</span> <span class="nx">indexer</span><span class="p">.</span><span class="nf">ByIndex</span><span class="p">(</span><span class="s">&#34;field:spec.config.configMapRef.name&#34;</span><span class="p">,</span> <span class="s">&#34;__all_namespaces/myapp-staging-conf&#34;</span><span class="p">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Based on its documentation, ByIndex looks for stored objects for key &ldquo;__all_namespaces/myapp-staging-conf&rdquo; in the index of &ldquo;field:spec.config.configMapRef.name&rdquo; indexer</p>
+<p>This may sound complicated but to simplify this flow, let&rsquo;s re iterate through the following types:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// the key is indexer&#39;s name, such as &#34;field:spec.config.configMapRef.name&#34;
+</span></span></span><span class="line"><span class="cl"><span class="c1">// the value is IndexFunc, such as the anonymous function mentioned previously.
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">type</span> <span class="nx">Indexer</span> <span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="nx">IndexFunc</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// the key is indexer&#39;s name, such as &#34;field:spec.config.configMapRef.name&#34;
+</span></span></span><span class="line"><span class="cl"><span class="c1">// the value is Index
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">type</span> <span class="nx">Indices</span> <span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="nx">Index</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="c1">// the key is indexed value, such as __all_namespaces/myapp-staging-conf
+</span></span></span><span class="line"><span class="cl"><span class="c1">// the value is set of strings that corresponds to
+</span></span></span><span class="line"><span class="cl"><span class="c1">// &lt;namespace&gt;/&lt;name&gt; metadata of the objects.
+</span></span></span><span class="line"><span class="cl"><span class="c1">//  For ex, default/myapp-staging1
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">type</span> <span class="nx">Index</span> <span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="nx">sets</span><span class="p">.</span><span class="nx">String</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>Now, we have set including <namespace>/<name> metadata of the MyApp resources.
+Then, threadSafeMap converts this Set to a list, and List operation is done by using the
+indexing functionality that we added.</p>
+<h2 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h2>
+<p>Throughout this post, we&rsquo;ve walked through Kubernetes client-side indexing,
+exploring both its practical use and internal workings. While this post shares one approach to using indexing for improving controller performance,
+there are many other patterns and best practices in the Kubernetes ecosystem that might better suit your specific needs.</p>
+<p>If you&rsquo;re interested in learning more about controller development, you might find my <a href="../controller-runtime-1">earlier post about Controller Runtime Manager</a> helpful, where I shared my experience with the core components of controllers.
+The <a href="https://book.kubebuilder.io">Kubebuilder documentation</a> is also an excellent resource that provides more comprehensive examples and different indexing use cases.</p>
+<p>I hope sharing these experiences with client-side indexing has been helpful for your journey :) Every controller and operator has unique requirements, and I&rsquo;d be interested to hear about your approaches to similar challenges. Feel free to share your thoughts or ask questions about implementing indexing in your controllers.</p>
+<p>If you notice any mistakes or have feedback, feel free to reach out to me on <a href="https://x.com/buraksekili">Twitter</a>, <a href="https://www.linkedin.com/in/sekili/">LinkedIn</a>, or GitHub.</p>
+<h2 id="references">References<a hidden class="anchor" aria-hidden="true" href="#references">#</a></h2>
+<ul>
+<li><a href="https://book.kubebuilder.io/">https://book.kubebuilder.io/</a></li>
+<li><a href="https://pkg.go.dev/sigs.k8s.io/controller-runtime">https://pkg.go.dev/sigs.k8s.io/controller-runtime</a></li>
+</ul>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <div class="social-icons"></div>
+
+    <ul class="post-tags">
+      <li><a href="https://buraksekili.github.io/tags/go/">Go</a></li>
+      <li><a href="https://buraksekili.github.io/tags/kubernetes/">Kubernetes</a></li>
+      <li><a href="https://buraksekili.github.io/tags/operator/">Operator</a></li>
+      <li><a href="https://buraksekili.github.io/tags/controller-runtime/">controller-runtime</a></li>
+    </ul>
+
+
+<div class="share-buttons">
+    <a target="_blank" rel="noopener noreferrer" aria-label="share Kubernetes Client Side Indexing on twitter"
+        href="https://twitter.com/intent/tweet/?text=Kubernetes%20Client%20Side%20Indexing&amp;url=https%3a%2f%2fburaksekili.github.io%2farticles%2fclient-k8s-indexing%2f&amp;hashtags=Go%2cKubernetes%2cOperator%2ccontroller-runtime">
+        <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+            <path
+                d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-253.927,424.544c135.939,0 210.268,-112.643 210.268,-210.268c0,-3.218 0,-6.437 -0.153,-9.502c14.406,-10.421 26.973,-23.448 36.935,-38.314c-13.18,5.824 -27.433,9.809 -42.452,11.648c15.326,-9.196 26.973,-23.602 32.49,-40.92c-14.252,8.429 -30.038,14.56 -46.896,17.931c-13.487,-14.406 -32.644,-23.295 -53.946,-23.295c-40.767,0 -73.87,33.104 -73.87,73.87c0,5.824 0.613,11.494 1.992,16.858c-61.456,-3.065 -115.862,-32.49 -152.337,-77.241c-6.284,10.881 -9.962,23.601 -9.962,37.088c0,25.594 13.027,48.276 32.95,61.456c-12.107,-0.307 -23.448,-3.678 -33.41,-9.196l0,0.92c0,35.862 25.441,65.594 59.311,72.49c-6.13,1.686 -12.72,2.606 -19.464,2.606c-4.751,0 -9.348,-0.46 -13.946,-1.38c9.349,29.426 36.628,50.728 68.965,51.341c-25.287,19.771 -57.164,31.571 -91.8,31.571c-5.977,0 -11.801,-0.306 -17.625,-1.073c32.337,21.15 71.264,33.41 112.95,33.41Z" />
+        </svg>
+    </a>
+    <a target="_blank" rel="noopener noreferrer" aria-label="share Kubernetes Client Side Indexing on linkedin"
+        href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fburaksekili.github.io%2farticles%2fclient-k8s-indexing%2f&amp;title=Kubernetes%20Client%20Side%20Indexing&amp;summary=Kubernetes%20Client%20Side%20Indexing&amp;source=https%3a%2f%2fburaksekili.github.io%2farticles%2fclient-k8s-indexing%2f">
+        <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+            <path
+                d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
+        </svg>
+    </a>
+    <a target="_blank" rel="noopener noreferrer" aria-label="share Kubernetes Client Side Indexing on reddit"
+        href="https://reddit.com/submit?url=https%3a%2f%2fburaksekili.github.io%2farticles%2fclient-k8s-indexing%2f&title=Kubernetes%20Client%20Side%20Indexing">
+        <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+            <path
+                d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-3.446,265.638c0,-22.964 -18.616,-41.58 -41.58,-41.58c-11.211,0 -21.361,4.457 -28.841,11.666c-28.424,-20.508 -67.586,-33.757 -111.204,-35.278l18.941,-89.121l61.884,13.157c0.756,15.734 13.642,28.29 29.56,28.29c16.407,0 29.706,-13.299 29.706,-29.701c0,-16.403 -13.299,-29.702 -29.706,-29.702c-11.666,0 -21.657,6.792 -26.515,16.578l-69.105,-14.69c-1.922,-0.418 -3.939,-0.042 -5.585,1.036c-1.658,1.073 -2.811,2.761 -3.224,4.686l-21.152,99.438c-44.258,1.228 -84.046,14.494 -112.837,35.232c-7.468,-7.164 -17.589,-11.591 -28.757,-11.591c-22.965,0 -41.585,18.616 -41.585,41.58c0,16.896 10.095,31.41 24.568,37.918c-0.639,4.135 -0.99,8.328 -0.99,12.576c0,63.977 74.469,115.836 166.33,115.836c91.861,0 166.334,-51.859 166.334,-115.836c0,-4.218 -0.347,-8.387 -0.977,-12.493c14.564,-6.47 24.735,-21.034 24.735,-38.001Zm-119.474,108.193c-20.27,20.241 -59.115,21.816 -70.534,21.816c-11.428,0 -50.277,-1.575 -70.522,-21.82c-3.007,-3.008 -3.007,-7.882 0,-10.889c3.003,-2.999 7.882,-3.003 10.885,0c12.777,12.781 40.11,17.317 59.637,17.317c19.522,0 46.86,-4.536 59.657,-17.321c3.016,-2.999 7.886,-2.995 10.885,0.008c3.008,3.011 3.003,7.882 -0.008,10.889Zm-5.23,-48.781c-16.373,0 -29.701,-13.324 -29.701,-29.698c0,-16.381 13.328,-29.714 29.701,-29.714c16.378,0 29.706,13.333 29.706,29.714c0,16.374 -13.328,29.698 -29.706,29.698Zm-160.386,-29.702c0,-16.381 13.328,-29.71 29.714,-29.71c16.369,0 29.689,13.329 29.689,29.71c0,16.373 -13.32,29.693 -29.689,29.693c-16.386,0 -29.714,-13.32 -29.714,-29.693Z" />
+        </svg>
+    </a>
+    <a target="_blank" rel="noopener noreferrer" aria-label="share Kubernetes Client Side Indexing on facebook"
+        href="https://facebook.com/sharer/sharer.php?u=https%3a%2f%2fburaksekili.github.io%2farticles%2fclient-k8s-indexing%2f">
+        <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+            <path
+                d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-106.468,0l0,-192.915l66.6,0l12.672,-82.621l-79.272,0l0,-53.617c0,-22.603 11.073,-44.636 46.58,-44.636l36.042,0l0,-70.34c0,0 -32.71,-5.582 -63.982,-5.582c-65.288,0 -107.96,39.569 -107.96,111.204l0,62.971l-72.573,0l0,82.621l72.573,0l0,192.915l-191.104,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Z" />
+        </svg>
+    </a>
+    <a target="_blank" rel="noopener noreferrer" aria-label="share Kubernetes Client Side Indexing on whatsapp"
+        href="https://api.whatsapp.com/send?text=Kubernetes%20Client%20Side%20Indexing%20-%20https%3a%2f%2fburaksekili.github.io%2farticles%2fclient-k8s-indexing%2f">
+        <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+            <path
+                d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-58.673,127.703c-33.842,-33.881 -78.847,-52.548 -126.798,-52.568c-98.799,0 -179.21,80.405 -179.249,179.234c-0.013,31.593 8.241,62.428 23.927,89.612l-25.429,92.884l95.021,-24.925c26.181,14.28 55.659,21.807 85.658,21.816l0.074,0c98.789,0 179.206,-80.413 179.247,-179.243c0.018,-47.895 -18.61,-92.93 -52.451,-126.81Zm-126.797,275.782l-0.06,0c-26.734,-0.01 -52.954,-7.193 -75.828,-20.767l-5.441,-3.229l-56.386,14.792l15.05,-54.977l-3.542,-5.637c-14.913,-23.72 -22.791,-51.136 -22.779,-79.287c0.033,-82.142 66.867,-148.971 149.046,-148.971c39.793,0.014 77.199,15.531 105.329,43.692c28.128,28.16 43.609,65.592 43.594,105.4c-0.034,82.149 -66.866,148.983 -148.983,148.984Zm81.721,-111.581c-4.479,-2.242 -26.499,-13.075 -30.604,-14.571c-4.105,-1.495 -7.091,-2.241 -10.077,2.241c-2.986,4.483 -11.569,14.572 -14.182,17.562c-2.612,2.988 -5.225,3.364 -9.703,1.12c-4.479,-2.241 -18.91,-6.97 -36.017,-22.23c-13.314,-11.876 -22.304,-26.542 -24.916,-31.026c-2.612,-4.484 -0.279,-6.908 1.963,-9.14c2.016,-2.007 4.48,-5.232 6.719,-7.847c2.24,-2.615 2.986,-4.484 4.479,-7.472c1.493,-2.99 0.747,-5.604 -0.374,-7.846c-1.119,-2.241 -10.077,-24.288 -13.809,-33.256c-3.635,-8.733 -7.327,-7.55 -10.077,-7.688c-2.609,-0.13 -5.598,-0.158 -8.583,-0.158c-2.986,0 -7.839,1.121 -11.944,5.604c-4.105,4.484 -15.675,15.32 -15.675,37.364c0,22.046 16.048,43.342 18.287,46.332c2.24,2.99 31.582,48.227 76.511,67.627c10.685,4.615 19.028,7.371 25.533,9.434c10.728,3.41 20.492,2.929 28.209,1.775c8.605,-1.285 26.499,-10.833 30.231,-21.295c3.732,-10.464 3.732,-19.431 2.612,-21.298c-1.119,-1.869 -4.105,-2.99 -8.583,-5.232Z" />
+        </svg>
+    </a>
+    <a target="_blank" rel="noopener noreferrer" aria-label="share Kubernetes Client Side Indexing on telegram"
+        href="https://telegram.me/share/url?text=Kubernetes%20Client%20Side%20Indexing&amp;url=https%3a%2f%2fburaksekili.github.io%2farticles%2fclient-k8s-indexing%2f">
+        <svg version="1.1" xml:space="preserve" viewBox="2 2 28 28" height="30px" width="30px" fill="currentColor">
+            <path
+                d="M26.49,29.86H5.5a3.37,3.37,0,0,1-2.47-1,3.35,3.35,0,0,1-1-2.47V5.48A3.36,3.36,0,0,1,3,3,3.37,3.37,0,0,1,5.5,2h21A3.38,3.38,0,0,1,29,3a3.36,3.36,0,0,1,1,2.46V26.37a3.35,3.35,0,0,1-1,2.47A3.38,3.38,0,0,1,26.49,29.86Zm-5.38-6.71a.79.79,0,0,0,.85-.66L24.73,9.24a.55.55,0,0,0-.18-.46.62.62,0,0,0-.41-.17q-.08,0-16.53,6.11a.59.59,0,0,0-.41.59.57.57,0,0,0,.43.52l4,1.24,1.61,4.83a.62.62,0,0,0,.63.43.56.56,0,0,0,.4-.17L16.54,20l4.09,3A.9.9,0,0,0,21.11,23.15ZM13.8,20.71l-1.21-4q8.72-5.55,8.78-5.55c.15,0,.23,0,.23.16a.18.18,0,0,1,0,.06s-2.51,2.3-7.52,6.8Z" />
+        </svg>
+    </a>
+    <a target="_blank" rel="noopener noreferrer" aria-label="share Kubernetes Client Side Indexing on ycombinator"
+        href="https://news.ycombinator.com/submitlink?t=Kubernetes%20Client%20Side%20Indexing&u=https%3a%2f%2fburaksekili.github.io%2farticles%2fclient-k8s-indexing%2f">
+        <svg version="1.1" xml:space="preserve" width="30px" height="30px" viewBox="0 0 512 512" fill="currentColor"
+            xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">
+            <path
+                d="M449.446 0C483.971 0 512 28.03 512 62.554L512 449.446C512 483.97 483.97 512 449.446 512L62.554 512C28.03 512 0 483.97 0 449.446L0 62.554C0 28.03 28.029 0 62.554 0L449.446 0ZM183.8767 87.9921H121.8427L230.6673 292.4508V424.0079H281.3328V292.4508L390.1575 87.9921H328.1233L256 238.2489z" />
+        </svg>
+    </a>
+</div>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+    <span>&copy; 2024 <a href="https://buraksekili.github.io/">Burak Sekili</a></span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

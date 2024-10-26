@@ -21,7 +21,6 @@
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
 <link rel="alternate" type="application/rss+xml" href="https://buraksekili.github.io/tags/go/index.xml">
-<link rel="alternate" hreflang="en" href="https://buraksekili.github.io/tags/go/">
 <noscript>
     <style>
         #theme-toggle,
@@ -59,20 +58,17 @@
 
     </style>
 </noscript>
-      <script async src="https://www.googletagmanager.com/gtag/js?id=G-M6ZJTX7HVG"></script>
-      <script>
-        var doNotTrack = false;
-        if ( false ) {
-          var dnt = (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack);
-          var doNotTrack = (dnt == "1" || dnt == "yes");
-        }
-        if (!doNotTrack) {
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', 'G-M6ZJTX7HVG');
-        }
-      </script><meta property="og:title" content="Go" />
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-M6ZJTX7HVG"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-M6ZJTX7HVG', { 'anonymize_ip': false });
+}
+</script>
+<meta property="og:title" content="Go" />
 <meta property="og:description" content="" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://buraksekili.github.io/tags/go/" />
@@ -120,8 +116,6 @@
                         <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
                     </svg>
                 </button>
-                <ul class="lang-switch"><li>|</li>
-                </ul>
             </div>
         </div>
         <ul id="menu">
@@ -155,13 +149,27 @@
 
 <article class="post-entry tag-entry"> 
   <header class="entry-header">
+    <h2>Kubernetes Client Side Indexing
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Kubernetes Client-Side Indexing This post is part of Kubernetes controller development. Check out the first part on Diving into controller-runtime | Manager if you are interested in controller-runtime.
+When working with Kubernetes Operators, read requests (get and list) to the Kubernetes API server are handled by an in-memory cache that is maintained by client-go to reduce the load on your API server. This cache can be enhanced with indexes to retrieve resources more efficiently....</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-10-27 00:00:00 +0000 UTC'>October 27, 2024</span>&nbsp;·&nbsp;15 min&nbsp;·&nbsp;Burak Sekili</footer>
+  <a class="entry-link" aria-label="post link to Kubernetes Client Side Indexing" href="https://buraksekili.github.io/articles/client-k8s-indexing/"></a>
+</article>
+
+<article class="post-entry tag-entry"> 
+  <header class="entry-header">
     <h2>Concurrency Notes in Go
     </h2>
   </header>
   <div class="entry-content">
     <p>Concurrency Channels Unbuffered channel If channel is unbuffered
 1 ch := make(chan struct{}) sending a data to channel will block the goroutine as the channel is nil.
-1 2 3 4 5 6 7 ...</p>
+1 2 3 4 5 6 7 package main func main() { ch := make(chan struct{}) ch &lt;- struct{}{} } Output of this program is:
+1 2 3 4 5 6 7 $ go run main.go fatal error: all goroutines are asleep - deadlock!...</p>
   </div>
   <footer class="entry-footer"><span title='2024-01-24 00:00:00 +0000 UTC'>January 24, 2024</span>&nbsp;·&nbsp;3 min&nbsp;·&nbsp;Burak Sekili</footer>
   <a class="entry-link" aria-label="post link to Concurrency Notes in Go" href="https://buraksekili.github.io/articles/concurrency/"></a>
