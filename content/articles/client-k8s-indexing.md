@@ -10,43 +10,36 @@ tags: ["Go", "Kubernetes", "Operator", "controller-runtime"]
 TocOpen: true
 ---
 
-## Kubernetes Client side indexing
+## Kubernetes Client-Side Indexing
 
-If you have worked with Kubernetes Operators, you probably know that read requests (get and list) to the Kubernetes
-API server are handled by in-memory caches maintained by client-go to reduce the load on your API server.
-You may also know that indexes can enhance these caches to retrieve resources more efficiently.
+When working with Kubernetes Operators, read requests (get and list) to the Kubernetes API server are handled by in-memory cache maintained by client-go to reduce the load on your API server. This cache can be enhanced with indexes to retrieve resources more efficiently.
 
-This post explains the underlying indexing implementation in controller-runtime (and ultimately in client-go). We'll look at how indexing works under the hood in these Kubernetes client libraries.
+This post explains the underlying indexing implementation in controller-runtime (and in client-go). We'll explore how indexing works under the hood in these Kubernetes client libraries.
 
-If you are interested in practical examples of indexing, the Kubebuilder book and controller-runtime package documentation already provide practical examples.
+If you're interested in practical examples of indexing, the Kubebuilder book and controller-runtime package documentation provide great practical examples and implementations.
 
 ### Purpose of Indexing
 
-One of the purposes of indexing in Kubernetes client libraries (client-go and controller-runtime) is to optimize the performance of
-Kubernetes controllers enable efficient lookups of cached objects based on specific attributes or relationships. This is crucial for:
+Indexing in Kubernetes client libraries (client-go and controller-runtime) optimizes the performance of Kubernetes controllers by enabling efficient lookups of cached objects based on specific attributes or relationships. This is crucial for:
 
-1.  Efficient Resource Retrieval: Find resources matching certain criteria without scanning the entire cache. This becomes quite handy if you manage resources depending on other resources.
+1. Efficient Resource Retrieval: Finding resources matching certain criteria without scanning the entire cache. This is particularly useful when managing resources that depend on other resources.
 
-2.  Reduced API Server Load: Minimizing the number of API calls to the Kubernetes API server through the local cache.
-    I assume most of Kubernetes Operators nowadays utilize controller-runtime where this behaviour comes by default.
+2. Reduced API Server Load: Minimizing the number of API calls to the Kubernetes API server through local caching. Most modern Kubernetes Operators utilize controller-runtime, where this behavior comes by default.
 
-3.  Responsive Reconciliation: Enabling controllers to react to changes in related resources. Here, I mean
-    that sometimes you only want to reconcile specific resources based on changes in specific resources.
+3. Responsive Reconciliation: Enabling controllers to react to changes in related resources. This allows you to reconcile specific resources based on changes in their dependencies.
 
-Let's go over these points through an example.
+Let's explore these concepts through an example.
 
 ### Scenario
 
-Let's go over the simplified version of an example used in kubebilder book.
+We'll examine a simplified version of an example from the Kubebuilder book.
 
-> We are going to use controller-runtime in our examples.
-> If you need general information about Kubernetes Operators and controller-runtime, you can
-> have a look at this post.
+> Note: We'll use controller-runtime in our examples. For general information about Kubernetes Operators and controller-runtime, please refer to my previous post.
 
-Assume that you have a CRD called MyApp to deploy your application on Kubernetes, which uses ConfigMap for MyApp specific configurations.
+Consider a Custom Resource Definition (CRD) called MyApp that deploys your application on Kubernetes and uses a ConfigMap for application-specific configurations.
 
-MyApp spec refers to ConfigMap for the base configuration. Based on the configuration file, MyApp controller
-reconciles to meet the desired state specified in the MyApp controller.
+The MyApp spec references a ConfigMap which includes MyApp specific configuration.
+The MyApp controller reconciles the desired state based on the following MyApp custom resource:
 
 ```yaml
 apiVersion: my.domain/v1alpha1
@@ -59,11 +52,9 @@ spec:
       name: "myapp-staging-conf"
 ```
 
-The desired behaviour in your mind is that whenever a ConfigMap specified via
-`spec.config.configMapRef.name` is updated, your MyApp needs to reflect those changes.
-In order to achieve this, MyApp needs to watch for ConfigMap resources.
+When a ConfigMap specified via `spec.config.configMapRef.name` is updated, MyApp should reflect those changes. To achieve this, MyApp needs to watch ConfigMap resources.
 
-The rough initialization of MyApp controller will look like the following:
+A basic initialization of the MyApp controller looks like this:
 
 ```go
 ctrl.NewControllerManagedBy(mgr).
@@ -71,19 +62,13 @@ ctrl.NewControllerManagedBy(mgr).
     Owns(&corev1.ConfigMap{})
 ```
 
-where the controller manages MyApp CR as a primary resource and ConfigMap as a secondary resource. This
-means that our controller will reconcile on MyApp CR and ConfigMap events, e.g., updating MyApp/ConfigMap.
+Here, the controller manages MyApp CR as the primary resource and ConfigMap as a secondary resource. The controller will reconcile on both MyApp CR and ConfigMap events (e.g., updates to either resource).
 
-The problem with the current approach is that even though we have a working solution,
-the efficiency of the implementation is arguable as the controller will reconcile each change on MyApp and ConfigMap resources.
-For example, any changes to any ConfigMap resources such as the ones not related to MyApp configuration will trigger reconciliation in this setup.
-Usually, reconcile logic we implement is costly. They may send external API calls, send Write requests
-to Kubernetes API etc. Therefore, as a developer, you may want to avoid running redundant reconciliations.
+While this approach works, its efficiency is arguable since the controller will reconcile on every change to MyApp and ConfigMap resources. For example, changes to ConfigMaps unrelated to MyApp configuration will trigger reconciliation. Since reconciliation logic is often costly, involving external API calls or write requests to the Kubernetes API, we should avoid unnecessary reconciliations.
 
-There are various way to achieve this, but idiomatic way to filter reconciliation requests goes through
-Predicates and Event handlers. I will not go through the details of this as they explained in my other blog. However, we'll see some example use cases where indexing is going to be crucial to achieve this.
+There are various ways to filter reconciliation requests, but the idiomatic approach uses Predicates and Event handlers. Since I covered these in previous blog post, we'll focus on scenarios where indexing is crucial.
 
-In our scenario assume that we have 3 MyApp instances created as follows:
+Consider three MyApp instances:
 
 ```yaml
 apiVersion: my.domain/v1alpha1
@@ -114,38 +99,27 @@ spec:
       name: "myapp-dev-conf"
 ```
 
-Here, our myapp-staging1 and myapp-staging2 MyApp instances use a ConfigMap called myapp-staging-conf while
-myapp-dev MyApp instance uses ConfigMap called myapp-dev-conf.
+Here, myapp-staging1 and myapp-staging2 use a ConfigMap called myapp-staging-conf, while myapp-dev uses myapp-dev-conf.
 
-In our reconciler, whenever a ConfigMap is updated, we want to update MyApp instances that use this
-particular ConfigMap.
+In our reconciler, when a ConfigMap is updated, we want to update only the MyApp instances that use that particular ConfigMap. This is where indexing becomes handy, allowing us to somehow correlate MyApp instances with their corresponding ConfigMaps.
 
-That's where indexing becomes handy. To find out dependent MyApp instances, we want to correlate
-MyApp instances with the ConfigMap they use.
+#### Indexing Implementation
 
-#### Indexing
+To find dependent MyApp instances, we need to find all MyApp instances using a particular ConfigMap. For example, when myapp-staging-conf is updated, we want to trigger reconciliation for both myapp-staging1 and myapp-staging2.
 
-Given a ConfigMap, we want to find all MyApp instances using this particular ConfigMap.
+To achieve that, we will add an index to the MyApp custom resource containing the name of its associated ConfigMap. This enables efficient retrieval of MyApp resources through this index.
 
-Let's assume we updated myapp-staging-conf ConfigMap which needs to trigger reconciliation on myapp-staging1 and myapp-staging2 MyApp instances.
+In controller-runtime, indexers are configured through the Cache interface, which provides methods to index and retrieve Kubernetes objects efficiently. The cache wraps client-go informers and provides additional capabilities, including indexing.
 
-To do that, we are going to add an index to MyApp custom resource which contains the name of the
-ConfigMap it uses. With this approach, we can then retrieve all MyApp resources through this particular
-index.
+When creating a new manager with `ctrl.NewManager()`, it initializes a cache (`cache.Cache`) to hold informers and indexers.
 
-In `controller-runtime`, indexers are set up through the Cache interface, which provides methods to
-index and retrieve Kubernetes objects efficiently.
-The cache wraps around the client-go informers and provides additional capabilities, including indexing.
-
-When you create a new manager using `ctrl.NewManager()`, it initializes a cache (`cache.Cache`) which will hold informers and indexers.
-
-Before starting the manager, you can add indexers via the `FieldIndexer`:
+Before starting the manager, add indexers via the `FieldIndexer`:
 
 ```go
 if err := mgr.GetFieldIndexer().IndexField(
     context.Background(),
     &v1alpha1.MyApp{},
-    "spec.config.configMapRef.name", // It can be anystring not only a field name such as `spec.config` etc.
+    "spec.config.configMapRef.name", // Can be any string, not limited to field names
     func(obj client.Object) []string {
         myApp := obj.(*v1alpha1.MyApp)
         cmName := myApp.Spec.Config.ConfigMapRef.Name
@@ -155,8 +129,8 @@ if err := mgr.GetFieldIndexer().IndexField(
 }
 ```
 
-This indexes MyApp resources based on myApp.Spec.Config.ConfigMapRef.Name field. When mgr.Start() is
-called, the cache starts all informers and sets up the indexers as configured.
+This indexes MyApp resources based on the `myApp.Spec.Config.ConfigMapRef.Name` field. When `mgr.Start()` is called, the cache initializes all informers and configures the indexers.
+
 In the reconciler, we can use controller-runtime client with indexing capabilities to efficiently query objects:
 
 ```go
@@ -168,15 +142,11 @@ listOps := &client.ListOptions{
 r.List(ctx, myAppList, listOps)
 ```
 
-This will list all MyApp resources on the cluster that use a ConfigMap called myapp-staging-conf.
-Kubernetes client looks for MyApp resources in the cache by using an index key ("spec.config.configMapRef.name").
+This lists all MyApp resources that use the ConfigMap "myapp-staging-conf". The Kubernetes client searches the cache using the index key "spec.config.configMapRef.name".
 
-#### Finishing controller
+#### Finishing the Controller initialization
 
-Now, we are able to list MyApp resources based on ConfigMap they use. Therefore, we do not need to
-run reconciliation on every MyApp instance if they do not use updated ConfigMap. What I mean by that
-is if you update myapp-staging-conf ConfigMap, MyApp controller does not need to run reconciliation on
-myapp-dev MyApp resource as this resource not using myapp-staging-conf.
+Now that we can list MyApp resources based on their associated ConfigMap, we can avoid unnecessary reconciliations. For example, when myapp-staging-conf is updated, we don't need to reconcile the myapp-dev resource since it uses a different ConfigMap.
 
 ```go
 ctrl.NewControllerManagedBy(mgr).
@@ -210,13 +180,11 @@ ctrl.NewControllerManagedBy(mgr).
             }),
         builder.WithPredicates(predicate.NewPredicateFuncs(
             func(object client.Object) bool {
-                // At the moment, we do not filter any ConfigMap based on metadata etc.
-                // You can filter some here by using predicate functions.
-                // For example, you may want to consider ConfigMaps with specific
-                // annotations such as `myapp/config` for reconciliation.
-                // Such annotation checks can happen here.
-                // Based on return value here (true or false), Enqueue function above
-                // will run.
+                // No ConfigMap filtering currently.
+                // Add predicate functions here to filter ConfigMaps
+                // For example, consider ConfigMaps with specific
+                // annotations like `myapp/config`
+                // The Enqueue function runs based on this return value
                 return true
             }),
         ),
@@ -224,8 +192,8 @@ ctrl.NewControllerManagedBy(mgr).
     Complete(r)
 ```
 
-Now, instead of owning all ConfigMap resources in the controller setup, we watches ConfigMaps based on
-prediciate function. After predicates are passed, we specify which MyApp resources will be reconciled
-within EnqueueRequestsFromMapFunc. As you can see, we use the index we created to find out all
-MyApp instances using the updated ConfigMap. Now, instead of running reconciliation over all MyApp
-instances, we only run over the ones that use the particular ConfigMap.
+Instead of owning all ConfigMap resources, the controller now watches ConfigMaps. 
+With the help of predicate functions, we can filter ConfigMap resources events before enqueuing MyApp 
+resources for reconciliation. 
+After passing predicates, we specify which MyApp resources to reconcile within `EnqueueRequestsFromMapFunc`. 
+Using our index, we can find MyApp instances using the updated ConfigMap, ensuring efficient reconciliation of only the relevant resources.
