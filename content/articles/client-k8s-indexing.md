@@ -3,9 +3,9 @@ editPost:
   #   URL: "https://github.com/buraksekili/buraksekili.github.io/blob/main/content/articles/thread-pooling-rs.md"
   Text: "Edit this page on "
 author: "Burak Sekili"
-title: "Kubernetes Client Side Indexing"
+title: "Kubernetes Client-Side Indexing"
 date: "2024-10-27"
-description: "Explore the implementation and need for thread pools in Rust"
+description: "How Kubernetes client-side indexing works: from implementation to internals"
 tags: ["Go", "Kubernetes", "Operator", "controller-runtime"]
 TocOpen: true
 ---
