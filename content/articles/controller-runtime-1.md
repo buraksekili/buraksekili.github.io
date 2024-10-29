@@ -98,12 +98,13 @@ objects from this Delta FIFO queue, indexes them for future retrievals, and disp
 #### Indexer
 
 
-
 Indexer saves objects into thread-safe Store by indexing the objects. This approach facilitates efficient querying of 
 objects from the cache. 
 
 Custom indexers, based on specific needs, can be created. For example, a custom indexer can be generated to retrieve all 
 objects based on certain fields, such as Annotations.
+
+More details about how Kubernetes indexing works, check [Kubernetes Client-Side Indexing](../client-k8s-indexing).
 
 ## Manager
 
