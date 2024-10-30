@@ -57,14 +57,18 @@ params:
       
       I am Burak, a software engineer working at [![Tyk](images/tyk-logo.png)](https://tyk.io/), with a keen interest in backend development, distributed systems, infrastructure applications, and developer tooling. 
       
-      At [![Tyk](images/tyk-logo.png)](https://tyk.io/), I work on
+      At [![Tyk](images/tyk-logo.png)](https://tyk.io/), I maintain and work on various projects including
       
-        - [Tyk Operator](https://github.com/TykTechnologies/tyk-operator/), Kubernetes Operator managing Tyk resources on Kubernetes.
-        - [Tyk Sync](https://github.com/TykTechnologies/tyk-sync/), Synchronisation tool for Tyk configuration files between multiple environments.
+        - [Tyk Operator](https://tyk.io/docs/tyk-operator/), Kubernetes Operator managing Tyk resources on Kubernetes.
+        - [Tyk Sync](https://tyk.io/docs/product-stack/tyk-sync/overview/), Synchronisation tool for Tyk configuration files between multiple environments.
         - [Tyk Charts](https://github.com/TykTechnologies/tyk-charts/), Helm Charts to deploy Tyk stack on Kubernetes.
         - [Tyk K8s Bootstrap](https://github.com/TykTechnologies/tyk-k8s-bootstrap/), Helm Chart hooks to bootstrap [tyk-stack](https://github.com/TykTechnologies/tyk-charts/tree/main/tyk-stack) Helm Chart in Kubernetes.
         - [Tyk Schemas](https://marketplace.visualstudio.com/items?itemName=TykTechnologiesLimited.tyk-schemas), a VsCode extension providing JSON validation for files used by Tyk products.
         - Other internal DX projects...
+
+      Open to discussing possible opportunities.
+
+      I blog about Go, Kubernetes, controller-runtime, and Rust.
       
       Find me on 👇
 
