@@ -54,23 +54,22 @@ params:
     enabled: true
     title: Burak Sekili
     description: |
-      
-      I am Burak, a software engineer working at [![Tyk](images/tyk-logo.png)](https://tyk.io/), with a keen interest in backend development, distributed systems, infrastructure applications, and developer tooling. 
-      
-      At [![Tyk](images/tyk-logo.png)](https://tyk.io/), I maintain and work on various projects including
-      
-        - [Tyk Operator](https://tyk.io/docs/tyk-operator/), Kubernetes Operator managing Tyk resources on Kubernetes.
-        - [Tyk Sync](https://tyk.io/docs/product-stack/tyk-sync/overview/), Synchronisation tool for Tyk configuration files between multiple environments.
-        - [Tyk Charts](https://github.com/TykTechnologies/tyk-charts/), Helm Charts to deploy Tyk stack on Kubernetes.
-        - [Tyk K8s Bootstrap](https://github.com/TykTechnologies/tyk-k8s-bootstrap/), Helm Chart hooks to bootstrap [tyk-stack](https://github.com/TykTechnologies/tyk-charts/tree/main/tyk-stack) Helm Chart in Kubernetes.
-        - [Tyk Schemas](https://marketplace.visualstudio.com/items?itemName=TykTechnologiesLimited.tyk-schemas), a VsCode extension providing JSON validation for files used by Tyk products.
-        - Other internal DX projects...
 
-      I also blog about Go, Kubernetes, controller-runtime, and Rust.
-
-      Open to discussing possible opportunities.
+      I'm Burak, a software engineer with a passion for distributed systems, infrastructure applications, and developer tooling.
       
-      Find me on 👇
+      I specialize and have professional experience in maintaining and developing projects such as:
+      
+      - Kubernetes Operators (managing resources on Kubernetes)
+      
+      - Synchronization tools for configuration management across environments
+      
+      - Helm Charts for deploying complex software stacks on Kubernetes
+        
+      - And various other developer experience (DX) initiatives (tooling, scripts, pipelines).
+      
+      I also share my insights on my blog, covering topics like Go, Kubernetes, controller-runtime, Rust and many more.
+      
+      I'm always open to discussing new opportunities.
 
     imageTitle: my image
     # imageWidth: 120
@@ -87,8 +86,8 @@ params:
       url: "https://twitter.com/buraksekili"
     - name: github
       url: "https://github.com/buraksekili"
-    - name: linkedin
-      url: "https://www.linkedin.com/in/sekili/"
+    # - name: linkedin
+    #   url: "https://www.linkedin.com/in/sekili/"
 
     # add more social icons. find more in svg.html file
     # - name: youtube
