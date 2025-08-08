@@ -59,7 +59,7 @@ params:
       
       I specialize and have professional experience in maintaining and developing projects such as:
       
-      - Kubernetes Operators (managing resources on Kubernetes)
+      - Kubernetes and Kubernetes Operators (managing resources on Kubernetes)
       
       - Synchronization tools for configuration management across environments
       
@@ -67,9 +67,9 @@ params:
         
       - And various other developer experience (DX) initiatives (tooling, scripts, pipelines).
       
-      I also share my insights on my blog, covering topics like Go, Kubernetes, controller-runtime, Rust and many more.
+      I also share my insights on my blog, covering topics like Go, Kubernetes, controller-runtime, Rust, and many more.
       
-      I'm always open to discussing new opportunities.
+      I'm always open to exploring new opportunities, including freelance work related to Kubernetes..
 
     imageTitle: my image
     # imageWidth: 120
@@ -86,6 +86,8 @@ params:
       url: "https://twitter.com/buraksekili"
     - name: github
       url: "https://github.com/buraksekili"
+    - name: email
+      url: "buraksekili@gmail.com"
     # - name: linkedin
     #   url: "https://www.linkedin.com/in/sekili/"
 
