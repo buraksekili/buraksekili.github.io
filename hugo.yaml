@@ -87,7 +87,7 @@ params:
     - name: github
       url: "https://github.com/buraksekili"
     - name: email
-      url: "buraksekili@gmail.com"
+      url: "mailto:buraksekili@gmail.com"
     # - name: linkedin
     #   url: "https://www.linkedin.com/in/sekili/"
 
