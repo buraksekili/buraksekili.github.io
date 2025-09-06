@@ -93,7 +93,7 @@ A steady increase in the number of open file descriptors is a strong indicator o
 
 You can start by checking `/proc/sys/fs/file-nr` to get an overall picture of file descriptor usage on the system.
 
-The three values in file-nr denote the number of allocated file handles, the number of allocated but unused file handles, and the maximum number of file handles. [Kernel.org]()
+> The three values in file-nr denote the number of allocated file handles, the number of allocated but unused file handles, and the maximum number of file handles, reference:[Kernel.org](https://www.kernel.org/doc/Documentation/sysctl/fs.txt).
 
 To identify the specific processes consuming the most file descriptors, you can run the following command.
 Note that it may take some time to complete.
