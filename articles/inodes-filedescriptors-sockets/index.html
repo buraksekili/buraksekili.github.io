@@ -72,7 +72,7 @@ if (!doNotTrack) {
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://buraksekili.github.io/articles/inodes-filedescriptors-sockets/" /><meta property="article:section" content="articles" />
 <meta property="article:published_time" content="2025-09-06T00:00:00+00:00" />
-<meta property="article:modified_time" content="2025-09-06T22:34:40+03:00" />
+<meta property="article:modified_time" content="2025-09-06T22:37:02+03:00" />
 
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Notes on i-nodes, File Descriptors, and Sockets"/>
@@ -113,7 +113,7 @@ if (!doNotTrack) {
   "wordCount" : "1407",
   "inLanguage": "en",
   "datePublished": "2025-09-06T00:00:00Z",
-  "dateModified": "2025-09-06T22:34:40+03:00",
+  "dateModified": "2025-09-06T22:37:02+03:00",
   "author":{
     "@type": "Person",
     "name": "Burak Sekili"
@@ -226,7 +226,7 @@ if (!doNotTrack) {
   <div class="post-content"><p>I&rsquo;ve always found the best way to learn something is to try and write it down. This post is the result of that process, a collection of my personal notes (zettelkasten) aimed at connecting the dots between three fundamental concepts in Linux: inodes, file descriptors, and sockets. So, this post is just a cleaned-up version of my personal notes, explaining how inodes (representing files on disk), file descriptors (used by programs), and sockets (for network communication) all fit together.</p>
 <h2 id="i-nodes">i-nodes<a hidden class="anchor" aria-hidden="true" href="#i-nodes">#</a></h2>
 <p>Every file and directory in a filesystem is represented by a data structure called an inode. The inode stores metadata about the object, such as its permissions, attributes, and the disk block locations of its data. In essence, an inode contains pointers to the actual data blocks on the disk, along with the file attributes.</p>
-<p><img loading="lazy" src="/images/inodes-filedescriptors-sockets-1#center" alt="inode-table"  />
+<p><img loading="lazy" src="/images/inodes-filedescriptors-sockets-1.png#center" alt="inode-table"  />
 </p>
 <p>This is an overly simplified reference of the inode table and data blocks. In real scenarios, since a file can be larger than a single disk block (typically 4KB or 8KB), the inode stores a series of pointers to all the data blocks that constitute the file. This allows the system to assemble the complete file from its scattered blocks.</p>
 <p>An inode also includes a reference count, which tracks the number of links pointing to it. When you create a link to a file, the system does not create a new inode or copy the data. Instead, it creates a new name entry in a directory and increments the reference count of the existing inode. The file&rsquo;s data blocks are only deallocated when this reference count drops to zero. Removing a file link, an operation known as &ldquo;unlinking&rdquo;, decrements this count.</p>
@@ -258,7 +258,7 @@ There are special file descriptors for processes (except daemons) in Linux: 0 (s
 <p>This per-process table, however, is only the first part of the structure. Each entry in the file descriptor table points to a second data structure: the system-wide open file table. An entry in this table, often called an &ldquo;open file description,&rdquo; records information like the current file offset and status flags (e.g., read-only, append-only). A file descriptor&rsquo;s reference to an open file description is unaffected even if the original file path is later removed or changed.</p>
 <p>Finally, each entry in the system-wide open file table points to the file&rsquo;s inode, which contains the metadata and pointers to the actual data on disk.</p>
 <p>With that being said, we can extend our simplified drawing above as follows:</p>
-<p><img loading="lazy" src="/images/inodes-filedescriptors-sockets-2#center" alt="fd-table"  />
+<p><img loading="lazy" src="/images/inodes-filedescriptors-sockets-2.png#center" alt="fd-table"  />
 </p>
 <p>The relationship between these tables is important when a process is forked. When fork() is called, the child process receives a copy of the parent&rsquo;s file descriptor table. Crucially, the corresponding file descriptors in both the parent and child tables point to the same entry in the system-wide open file table. This means that they share a file offset; if the child reads from the file, the offset advances for the parent as well.</p>
 <p>In contrast, processes that are completely independent of each other have separate file descriptor tables that do not share these underlying open file descriptions.</p>
