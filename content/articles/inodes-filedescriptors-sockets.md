@@ -24,7 +24,7 @@ An inode also includes a reference count, which tracks the number of links point
 
 The following example demonstrates this concept. First, let's inspect a new file:
 
-```
+```bash
 $ ls -il   
 total 0  
 3558217 -rw-rw-r-- 1 burak burak 0 Sep  6 17:54 document.md  
@@ -32,7 +32,7 @@ total 0
 
 The first column in the output is the inode number (`3558217`), and the third column is the reference count (`1`). Now, let's create a hard link to the file:
 
-``` 
+```bash
 $ ln document.md document-linked.md  
 $ ls -il   
 total 0  
@@ -44,13 +44,21 @@ After creating a hard link named `document-linked.md`, the output shows that bot
 
 Finally, if one of the links is removed, the reference count is decremented.
 
-```
+```bash
 $ rm document-linked.md && ls -il  
 total 0  
 3558217 -rw-rw-r-- 1 burak burak 0 Sep  6 17:54 document.md  
 ```
 
 The inode and its data persist as long as the reference count is greater than zero.
+
+It's good practice to monitor inode usage on your system. Even if your disk has sufficient storage space, you might still get "no space left on device" or similar errors. 
+This can happen if a process creates a massive number of small files.
+
+The issue, in this case, isn't a lack of storage capacity, but rather a shortage of available inodes to track new files. Since Linux uses an inode to manage every file and directory, a faulty process that creates too many files can exhaust all available inodes.
+For instance, if your HTTP server creates a lot of temporary files, sessions, etc, then you might face such issues at scale.
+
+Therefore, monitoring inode usage is crucial for system health.
 
 ## File Descriptors
 
@@ -76,6 +84,28 @@ With that being said, we can extend our simplified drawing above as follows:
 The relationship between these tables is important when a process is forked. When fork() is called, the child process receives a copy of the parent's file descriptor table. Crucially, the corresponding file descriptors in both the parent and child tables point to the same entry in the system-wide open file table. This means that they share a file offset; if the child reads from the file, the offset advances for the parent as well.
 
 In contrast, processes that are completely independent of each other have separate file descriptor tables that do not share these underlying open file descriptions.
+
+Monitoring file descriptors is a helpful practice for SREs and system administrators. 
+It's likely to face "too many open files" errors in day-to-day operations, even in staging environments. 
+These errors often occur when an application forgets to close files after using them, causing a resource leak over time.
+
+A steady increase in the number of open file descriptors is a strong indicator of a leak in an application's logic.
+
+You can start by checking `/proc/sys/fs/file-nr` to get an overall picture of file descriptor usage on the system.
+
+The three values in file-nr denote the number of allocated file handles, the number of allocated but unused file handles, and the maximum number of file handles. [Kernel.org]()
+
+To identify the specific processes consuming the most file descriptors, you can run the following command.
+Note that it may take some time to complete.
+
+```bash
+sudo lsof -n | awk '{print $2}' | sort | uniq -c | sort -rn | head -n 10
+```
+
+After identifying the process IDs (PIDs), you can use `ps -fn <pid>` to understand what each process is doing.
+
+Also, you can inspect the open files for a specific process with `lsof -p <pid>`. 
+This helps identify the source of a leak, such as unclosed temporary files or TCP connections that aren't terminating properly.
 
 ## Sockets
 
