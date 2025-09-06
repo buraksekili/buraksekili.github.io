@@ -164,6 +164,21 @@ if (!doNotTrack) {
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2>Concurrency Notes in Go
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>Concurrency Channels Unbuffered channel If channel is unbuffered
+1 ch := make(chan struct{}) sending a data to channel will block the goroutine as the channel is nil.
+1 2 3 4 5 6 7 package main func main() { ch := make(chan struct{}) ch &lt;- struct{}{} } Output of this program is:
+1 2 3 4 5 6 7 $ go run main.go fatal error: all goroutines are asleep - deadlock!...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-01-24 00:00:00 +0000 UTC'>January 24, 2024</span>&nbsp;·&nbsp;3 min&nbsp;·&nbsp;Burak Sekili</footer>
+  <a class="entry-link" aria-label="post link to Concurrency Notes in Go" href="https://buraksekili.github.io/articles/concurrency/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2>Diving into controller-runtime | Manager
     </h2>
   </header>

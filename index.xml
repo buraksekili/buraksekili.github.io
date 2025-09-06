@@ -6,7 +6,16 @@
     <description>Recent content on Burak Sekili</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Sun, 27 Oct 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://buraksekili.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 06 Sep 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://buraksekili.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Notes on i-nodes, File Descriptors, and Sockets</title>
+      <link>https://buraksekili.github.io/articles/inodes-filedescriptors-sockets/</link>
+      <pubDate>Sat, 06 Sep 2025 00:00:00 +0000</pubDate>
+      
+      <guid>https://buraksekili.github.io/articles/inodes-filedescriptors-sockets/</guid>
+      <description>A Developer&amp;#39;s Notes on Inodes, File Descriptors, and Sockets</description>
+    </item>
+    
     <item>
       <title>Kubernetes Client-Side Indexing</title>
       <link>https://buraksekili.github.io/articles/client-k8s-indexing/</link>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>file on Burak Sekili</title>
+    <link>https://buraksekili.github.io/tags/file/</link>
+    <description>Recent content in file on Burak Sekili</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Sat, 06 Sep 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://buraksekili.github.io/tags/file/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Notes on i-nodes, File Descriptors, and Sockets</title>
+      <link>https://buraksekili.github.io/articles/inodes-filedescriptors-sockets/</link>
+      <pubDate>Sat, 06 Sep 2025 00:00:00 +0000</pubDate>
+      
+      <guid>https://buraksekili.github.io/articles/inodes-filedescriptors-sockets/</guid>
+      <description>A Developer&amp;#39;s Notes on Inodes, File Descriptors, and Sockets</description>
+    </item>
+    
+  </channel>
+</rss>
