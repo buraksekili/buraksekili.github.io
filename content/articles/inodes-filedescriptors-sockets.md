@@ -16,7 +16,7 @@ I've always found the best way to learn something is to try and write it down. T
 
 Every file and directory in a filesystem is represented by a data structure called an inode. The inode stores metadata about the object, such as its permissions, attributes, and the disk block locations of its data. In essence, an inode contains pointers to the actual data blocks on the disk, along with the file attributes.
 
-![inode-table](/images/inodes-filedescriptors-sockets-1#center)
+![inode-table](/images/inodes-filedescriptors-sockets-1.png#center)
 
 This is an overly simplified reference of the inode table and data blocks. In real scenarios, since a file can be larger than a single disk block (typically 4KB or 8KB), the inode stores a series of pointers to all the data blocks that constitute the file. This allows the system to assemble the complete file from its scattered blocks.
 
@@ -71,7 +71,7 @@ Finally, each entry in the system-wide open file table points to the file's inod
 
 With that being said, we can extend our simplified drawing above as follows:
 
-![fd-table](/images/inodes-filedescriptors-sockets-2#center)
+![fd-table](/images/inodes-filedescriptors-sockets-2.png#center)
 
 The relationship between these tables is important when a process is forked. When fork() is called, the child process receives a copy of the parent's file descriptor table. Crucially, the corresponding file descriptors in both the parent and child tables point to the same entry in the system-wide open file table. This means that they share a file offset; if the child reads from the file, the offset advances for the parent as well.
 
