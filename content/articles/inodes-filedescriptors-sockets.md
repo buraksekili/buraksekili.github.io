@@ -85,7 +85,7 @@ The three most common types of sockets are Stream, Datagram, and Unix Domain soc
 
 The process begins with the socket() system call, which creates a communication endpoint and returns a socket descriptor. This descriptor is implemented as a file descriptor, allowing programs to use many standard file-related calls like read() and write() to send and receive data. However, not all file operations apply to sockets; for example, a syscall lseek() has no meaning for a socket stream and cannot be used.
 
-## The Server (Passive Socket) Lifecycle
+### Passive Socket
 
 A server follows a specific sequence of system calls to establish a listening socket capable of accepting client connections.
 
@@ -101,7 +101,7 @@ A server follows a specific sequence of system calls to establish a listening so
     
 - **`close()`**: When communication is finished, the socket file descriptor is closed.
 
-## The Client (Active Socket) Lifecycle
+### Active Socket 
 
 The client-side setup is more straightforward.
 
