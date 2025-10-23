@@ -56,20 +56,21 @@ params:
     description: |
 
       I'm Burak, a software engineer with a passion for distributed systems, infrastructure applications, and developer tooling.
+      I help businesses build and automate scalable, cloud-native systems.
       
       I specialize and have professional experience in maintaining and developing projects such as:
       
-      - Kubernetes and Kubernetes Operators (managing resources on Kubernetes)
+      - Developing Kubernetes Operators (controllers) in Go to automate complex cluster management
+
+      - Open source development
       
-      - Synchronization tools for configuration management across environments
+      - Deployment & Packaging by creating and managing complex software stacks using Helm Charts.
       
-      - Helm Charts for deploying complex software stacks on Kubernetes
-        
-      - And various other developer experience (DX) initiatives (tooling, scripts, pipelines).
+      - And various other developer experience (DX) initiatives (tooling, scripts, CI/CD pipelines).
       
-      I also share my insights on my blog, covering topics like Go, Kubernetes, controller-runtime, Rust, and many more.
+      I also share my insights on my blog, covering topics like Go, Kubernetes, Linux, controller-runtime, Rust, and many more.
       
-      I'm always open to exploring new opportunities, including freelance work related to Kubernetes.
+      I am currently available for freelance (B2B) contract roles focused on Kubernetes, cloud-native automation, and technical leadership.
 
     imageTitle: my image
     # imageWidth: 120
