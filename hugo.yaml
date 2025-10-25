@@ -60,9 +60,9 @@ params:
       
       I specialize and have professional experience in maintaining and developing projects such as:
       
-      - Developing Kubernetes Operators (controllers) in Go to automate complex cluster management
+      - Developing Kubernetes controllers in Go to automate cluster lifecycle.
 
-      - Open source development
+      - Open source development.
       
       - Deployment & Packaging by creating and managing complex software stacks using Helm Charts.
       
