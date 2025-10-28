@@ -56,7 +56,7 @@ params:
     description: |
 
       I'm Burak, a software engineer with a passion for distributed systems, infrastructure applications, and developer tooling.
-      I help businesses build and automate scalable, cloud-native systems. I specialize and have professional experience in maintaining and developing projects such as:
+      I help businesses build and automate scalable, cloud-native systems. <br/> I specialize and have professional experience in maintaining and developing projects such as:
       
       - Developing Kubernetes controllers in Go to automate cluster lifecycle.
 
