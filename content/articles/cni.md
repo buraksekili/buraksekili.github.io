@@ -1376,7 +1376,7 @@ You may also see an **`initContainer`** in CNI DaemonSets.
 This init container often has `privileged: true` and mounts `hostPath` volumes for `/opt/cni/bin` and `/etc/cni/net.d`.
 Its job is different: it's responsible for installing the *CNI plugin binary* (like our `bridge` plugin) onto the host's filesystem, so the `kubelet` can call it.
 
-#### The Controller
+#### Controller
 
 > Note: The following is a simplified pseudocode representation.
 > It omits error handling, logging, and other production-level details to focus purely on the core logic and execution flow.
