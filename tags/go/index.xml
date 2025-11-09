@@ -6,7 +6,16 @@
     <description>Recent content in Go on Burak Sekili</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Sun, 27 Oct 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://buraksekili.github.io/tags/go/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 09 Nov 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://buraksekili.github.io/tags/go/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Let&#39;s Build a CNI Plugin! From Linux Networking to CNI</title>
+      <link>https://buraksekili.github.io/articles/cni/</link>
+      <pubDate>Sun, 09 Nov 2025 00:00:00 +0000</pubDate>
+      
+      <guid>https://buraksekili.github.io/articles/cni/</guid>
+      <description>From networking theory to Kubernetes networking. This blog covers networking fundamentals, Linux networking, and writing a CNI plugin and daemon in Go.</description>
+    </item>
+    
     <item>
       <title>Kubernetes Client-Side Indexing</title>
       <link>https://buraksekili.github.io/articles/client-k8s-indexing/</link>
