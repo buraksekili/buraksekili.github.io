@@ -87,11 +87,11 @@ In the following example, we have two networks connected to each other via Route
 │                      │            IF2:          │                       │ 
 │                      │            MAC: DD       │                       │ 
 │                      │            IP: 71.0.0.1  │                       │ 
-│        HOST A        │       Router             │        HOST B         │ 
-│    ┌─────────────┐   │      xxxxxxxxx           │    ┌─────────────┐    │ 
-│    │MAC: AA      │   │     x         x          │    │MAC: BB      │    │ 
-│    │             ┼───│──>  x         x────────> │    │             │    │ 
-│    │IP: 10.0.0.50│   │     x         x          │    │IP: 50.0.2.19│    │ 
+│        HOST A        │       Router             │        HOST B         │
+│    ┌─────────────┐   │      xxxxxxxxx           │    ┌─────────────┐    │
+│    │MAC: AA      │   │     x         x          │    │MAC: BB      │    │
+│    │             ┼───│──>  x         x────────> │    │             │    │
+│    │IP: 10.0.0.50│   │     x         x          │    │IP: 71.0.0.59│    │
 │    └─────────────┘   │      xxxxxxxxx           │    └─────────────┘    │ 
 │                      │   IF1:                   │                       │ 
 │                      │   MAC: CC                │                       │ 
@@ -593,9 +593,9 @@ By using this rule, we are able to ping the Internet. We need to add a similar r
 
 Let's first check the full routing table inside container0:
 ```bash
-$ ip route
+$ ip netns exec container0 ip route
 10.0.1.0/24 dev c0-veth proto kernel scope link src 10.0.1.50
-$ ip route get 8.8.8.8
+$ ip netns exec container0 ip route get 8.8.8.8
 RTNETLINK answers: Network is unreachable
 ```
 
@@ -652,7 +652,8 @@ This operation only applies to within network traffic as we explained in the fir
 However, ping 8.8.8.8 is a Layer 3 (routing) operation. The container sends the packet to its gateway (the `br0` interface), meaning that we need to reach another network. As you remember, this requires [routing](#routing-l3-domain) as we need to move data between networks.
 The host's kernel receives this packet on `br0` and, after checking its own route table, sees it must send it out a different interface (like `eth0`).
 
-This act of receiving a packet on one interface and forwarding it to another is called L3 forwarding. By default, the Linux kernel disables this for security, so a machine doesn't accidentally act as a router. We must explicitly enable this by setting `net.ipv4.ip_forward=1`.
+This act of receiving a packet on one interface and forwarding it to another is called L3 forwarding (or IP forwarding). By default, the Linux kernel disables this for security, where the kernel will simply drop packets that are not destined for its own IP addresses, refusing to act as a router between interfaces.
+We must explicitly enable this by setting `net.ipv4.ip_forward=1`, which tells the kernel to forward packets between network interfaces.
 
 That's the first problem.
 The second problem is [NAT](#nat). The packet from `container0` has a source IP of 10.0.1.50.
@@ -1279,8 +1280,7 @@ We'll develop an example controller to perform this as well.
 These protocols allow configuring routers to exchange route information between each other.
 BGP is one of the popular protocol used for this.
 
-BGP, in general, forms neighourship across routers, where neighbourship is declared statically.
-Once you register your peers, routing information is shared across routers, through a TCP connection.
+BGP, in general, forms neighborship across routers through either static or dynamic peer configuration. Once you register your peers, routing information is shared across routers through a TCP connection.
 
 In Kubernetes, this usually works by having the CNI daemon on each node run a lightweight BGP agent.
 This agent "peers" (forms a BGP neighborship). Calico is a famous CNI plugin that supports BGP.
@@ -1309,7 +1309,7 @@ It does this by "wrapping" it inside a new, "outer" packet. This process is call
 The new outer packet is addressed to the node that the pod lives on (e.g., Node 2's IP), which the physical network does understand.
 
 One of the most common overlay networking technique is VXLAN (Virtual Extensible LAN) which uses the similar idea of wrapping packets.
-Each node has a virtual device called VTEP (Virtual Tunnel Endpoint), where packets are sent to this tunnel endpoint before they are going into other nodes.
+Each node has a virtual device called VTEP (Virtual Tunnel Endpoint), where packets are sent to this tunnel endpoint before they are going into other nodes. These VTEP devices are typically created and managed by the CNI daemon (like Flannel's daemon), which watches the Kubernetes API for new nodes and configures the VXLAN tunnels accordingly.
 
 For example, assume that we have Pod A on Node 1 and Pod B on Node 2.
 When Pod A on Node 1 sends a packet to Pod B, the packet targets Pod B's IP address.
