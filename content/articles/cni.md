@@ -50,7 +50,7 @@ The most important feature of switch is that it allows communication **_within_*
 
 The switch handles traffic within our network, but what happens when a device wants to communicate with a device on a different network, like a server on the internet? The switch, looking at the destination MAC address, will see that it's not a local device and will send the data to the network's exit point, the router.
 
-Routers allow communication between networks. This is one of the crucial differences between switch and router. Inter-network traffic is usually handled by switch. But once the packet needs to reach wide area network (WAN), or in other words another network on the Internet, we need a router.
+Routers allow communication between networks. This is one of the crucial differences between switch and router. Traffic within a local network is usually handled by switch. But once the packet needs to reach wide area network (WAN), or in other words another network on the Internet, we need a router.
 
 Router knows which networks that they can route by maintaining a routing table, allowing them to
 know where the corresponding IP address may be found in the WAN. When your router receives a data packet destined for Google, it doesn't know Google's MAC address but IP address. It consults its routing table and forwards the packet to the next router on the path, which repeats the process. This forwarding across many different networks is what allows you to reach any destination on the internet.
