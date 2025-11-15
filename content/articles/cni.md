@@ -1519,7 +1519,7 @@ As I mentioned, this is all based on my personal notes. If you find any mistakes
 - [Kubernetes and the CNI: Where We Are and What's Next - Casey Callendrello, CoreOS](https://www.youtube.com/watch?v=Vn6KYkNevBQ&t)
 - [Linux Namespaces and Go Don't Mix](https://web.archive.org/web/20190226080835/https://www.weave.works/blog/linux-namespaces-and-go-don-t-mix)
 - [Linux Namespaces Part 4](https://ifeanyi.co/posts/linux-namespaces-part-4/)
-- [Namespaces in Operation, part 4: more on PID namespaces](https://lwn.net/Articles/580893/)
+- [Namespaces in operation, part 7: Network namespaces](https://lwn.net/Articles/580893/)
 - [Networking and Kubernetes: A Layered Approach](https://www.amazon.com/Networking-Kubernetes-Approach-James-Strong/dp/1492081655)
 - [Runtime Package Documentation](https://pkg.go.dev/runtime)
 - [Tutorial: Communication Is Key - Understanding Kubernetes Networking - Jeff Poole, Vivint Smart Home](https://www.youtube.com/watch?v=InZVNuKY5GY)
