@@ -787,7 +787,7 @@ we could utilize Switch + Routers. But the common ways to solve this are 'Overla
 ### How CNI Plugins Called
 
 The CNI (Container Network Interface) specification defines how a container runtime, like Kubernetes, interacts with network plugins. This guide covers the fundamental operations and concepts you need to know.
-If you are looking for more details, please take a look at the actual specification (https://github.com/containernetworking/cni/blob/main/SPEC.md).
+If you are looking for more details, please take a look at the actual specification, https://github.com/containernetworking/cni/blob/main/SPEC.md.
 
 A runtime calls a CNI plugin by providing two key inputs: a JSON network configuration (via STDIN) and a set of environment variables.
 
