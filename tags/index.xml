@@ -6,22 +6,31 @@
     <description>Recent content in Tags on Burak Sekili</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Sun, 09 Nov 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://buraksekili.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 07 Feb 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://buraksekili.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Kubernetes</title>
+      <link>https://buraksekili.github.io/tags/kubernetes/</link>
+      <pubDate>Sat, 07 Feb 2026 00:00:00 +0000</pubDate>
+      
+      <guid>https://buraksekili.github.io/tags/kubernetes/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Networking</title>
+      <link>https://buraksekili.github.io/tags/networking/</link>
+      <pubDate>Sat, 07 Feb 2026 00:00:00 +0000</pubDate>
+      
+      <guid>https://buraksekili.github.io/tags/networking/</guid>
+      <description></description>
+    </item>
+    
     <item>
       <title>Go</title>
       <link>https://buraksekili.github.io/tags/go/</link>
       <pubDate>Sun, 09 Nov 2025 00:00:00 +0000</pubDate>
       
       <guid>https://buraksekili.github.io/tags/go/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Kubernetes</title>
-      <link>https://buraksekili.github.io/tags/kubernetes/</link>
-      <pubDate>Sun, 09 Nov 2025 00:00:00 +0000</pubDate>
-      
-      <guid>https://buraksekili.github.io/tags/kubernetes/</guid>
       <description></description>
     </item>
     
@@ -40,15 +49,6 @@
       <pubDate>Sun, 09 Nov 2025 00:00:00 +0000</pubDate>
       
       <guid>https://buraksekili.github.io/tags/linux-networking/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Networking</title>
-      <link>https://buraksekili.github.io/tags/networking/</link>
-      <pubDate>Sun, 09 Nov 2025 00:00:00 +0000</pubDate>
-      
-      <guid>https://buraksekili.github.io/tags/networking/</guid>
       <description></description>
     </item>
     

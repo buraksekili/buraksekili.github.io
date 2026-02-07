@@ -6,7 +6,16 @@
     <description>Recent content in Networking on Burak Sekili</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Sun, 09 Nov 2025 00:00:00 +0000</lastBuildDate><atom:link href="https://buraksekili.github.io/tags/networking/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 07 Feb 2026 00:00:00 +0000</lastBuildDate><atom:link href="https://buraksekili.github.io/tags/networking/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Konnectivity xfr-channel-size Configuration Guide: Understanding Konnectivity</title>
+      <link>https://buraksekili.github.io/articles/konnectivity-xfr-channel-size/</link>
+      <pubDate>Sat, 07 Feb 2026 00:00:00 +0000</pubDate>
+      
+      <guid>https://buraksekili.github.io/articles/konnectivity-xfr-channel-size/</guid>
+      <description>Learn how to configure and tune xfr-channel-size in Konnectivity. Understand buffer channels, fix channel full warnings, and optimize memory usage for production Kubernetes clusters.</description>
+    </item>
+    
     <item>
       <title>Let&#39;s Build a CNI Plugin! From Linux Networking to CNI</title>
       <link>https://buraksekili.github.io/articles/cni/</link>
