@@ -14,6 +14,7 @@ TocOpen: true
 
 I have often encountered situations where network connectivity between the API server and cluster nodes becomes complicated. Firewalls, network policies, and VPC configurations can block direct communication.
 This is where Konnectivity comes in. It provides a network proxy system that tunnels traffic through these barriers.
+
 During my work with Konnectivity, I encountered the warning message `Receive channel from agent is full` in my cluster logs. I asked the Kubernetes community for help but didn't receive a response.
 I also couldn't find any documentation explaining what this warning meant or how to fix it, or even any documentation about this component :(.
 So, this lead me to reading the source code to understand what `xfr-channel-size` actually does, which controls data buffering, and getting it right can make a difference in how your cluster performs under load.
