@@ -138,7 +138,7 @@ A larger buffer can absorb the burst without causing backpressure. If you proxy 
 
 ## References
 
-The research for this article is based on the apiserver-network-proxy codebase (unfortunately for me :)).
+The research for this article is based on the apiserver-network-proxy codebase (unfortunate for me :)).
 You can find the server frontend channel implementation in [pkg/server/server.go](https://github.com/kubernetes-sigs/apiserver-network-proxy/blob/d6ea7d8286376fbe19b19b281f008504bccf5bb3/pkg/server/server.go#L769).
 The server backend channel warning is at the same [package](https://github.com/kubernetes-sigs/apiserver-network-proxy/blob/d6ea7d8286376fbe19b19b281f008504bccf5bb3/pkg/server/server.go#L842).
 
