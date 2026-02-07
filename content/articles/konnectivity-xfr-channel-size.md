@@ -6,7 +6,7 @@ author: "Burak Sekili"
 title: "Konnectivity xfr-channel-size Configuration Guide: Understanding Konnectivity"
 date: "2026-02-07"
 description: "Learn how to configure and tune xfr-channel-size in Konnectivity. Understand buffer channels, fix channel full warnings, and optimize memory usage for production Kubernetes clusters."
-tags: ["kubernetes", "networking"]
+tags: ["Kubernetes", "Networking"]
 TocOpen: true
 ---
 
