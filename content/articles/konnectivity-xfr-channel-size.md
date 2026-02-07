@@ -17,7 +17,7 @@ This is where Konnectivity comes in. It provides a network proxy system that tun
 
 During my work with Konnectivity, I encountered the warning message `Receive channel from agent is full` in my cluster logs. I asked the Kubernetes community for help but didn't receive a response.
 I also couldn't find any documentation explaining what this warning meant or how to fix it, or even any documentation about this component :(.
-So, this lead me to reading the source code to understand what `xfr-channel-size` actually does, which controls data buffering, and getting it right can make a difference in how your cluster performs under load.
+So, this led me to reading the source code to understand what `xfr-channel-size` actually does, which controls data buffering, and getting it right can make a difference in how your cluster performs under load.
 
 In this article I will explain what `xfr-channel-size` does, why it exists, and how you can tune it for your environment based on my experience.
 
@@ -25,7 +25,6 @@ In this article I will explain what `xfr-channel-size` does, why it exists, and 
 
 Konnectivity is one of those Kubernetes components that works quietly in the background until something breaks.
 You don't hear much about it, and good luck finding comprehensive documentation.
-It's like the quiet cousin of the more famous Kubernetes networking components.
 But it plays a critical role in many production clusters, especially managed Kubernetes services where the control plane is separated from worker nodes.
 
 ## What is Konnectivity?
