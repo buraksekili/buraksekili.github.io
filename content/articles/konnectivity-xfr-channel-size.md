@@ -27,15 +27,12 @@ Konnectivity is one of those Kubernetes components that works quietly in the bac
 You don't hear much about it, and good luck finding comprehensive documentation.
 But it plays a critical role in many production clusters, especially managed Kubernetes services where the control plane is separated from worker nodes.
 
-## What is Konnectivity?
-
-Konnectivity is a Kubernetes component that solves the network connectivity problem between the Kubernetes API server and cluster nodes.
-In some deployments, the API server cannot directly reach kubelets or pods because of network policies, firewalls, or VPC configurations (like managed Kubernetes offerings where control plane is managed by cloud provider while data plane nodes are managed by customers).
+Konnectivity solves the network connectivity problem between the Kubernetes API server and cluster nodes.
+In some deployments, the API server cannot directly reach kubelets or pods because of network policies, firewalls, or VPC configurations (like managed Kubernetes offerings where the control plane is managed by the cloud provider while data plane nodes are managed by customers).
 Konnectivity creates a tunnel through these barriers.
-The system has two main components.
-The proxy server runs alongside the Kubernetes API server in the control plane.
-The agent runs as a daemon set or deployment on each worker node.
-When the API server needs to communicate with a kubelet or pod, it sends the request through the proxy server.
+
+It has two main components. The proxy server runs alongside the Kubernetes API server in the control plane. The agent runs as a daemon set or deployment on each worker node.
+When the Kubernetes API server needs to communicate with a kubelet or pod, it sends the request through the proxy server.
 The proxy server forwards it to the appropriate agent, and the agent delivers it to the destination. Responses follow the same path in reverse.
 
 ## Why Do We Need Buffers?
