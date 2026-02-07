@@ -3,14 +3,14 @@ editPost:
   URL: "https://github.com/buraksekili/buraksekili.github.io/blob/main/content/articles/konnectivity-xfr-channel-size.md"
   Text: "Edit this page on "
 author: "Burak Sekili"
-title: "Konnectivity xfr-channel-size Configuration Guide: Understanding Konnectivity"
+title: "Kubernetes Konnectivity xfr-channel-size Configuration"
 date: "2026-02-07"
-description: "Learn how to configure and tune xfr-channel-size in Konnectivity. Understand buffer channels, fix channel full warnings, and optimize memory usage for production Kubernetes clusters."
+description: "Configure and tune xfr-channel-size in Konnectivity. Understand buffer channels, fix channel full warnings, and optimize memory usage for production Kubernetes clusters."
 tags: ["Kubernetes", "Networking"]
 TocOpen: true
 ---
 
-# Understanding xfr-channel-size Configuration in Konnectivity
+# Kubernetes Konnectivity xfr-channel-size Configuration
 
 I have often encountered situations where network connectivity between the API server and cluster nodes becomes complicated. Firewalls, network policies, and VPC configurations can block direct communication.
 This is where Konnectivity comes in. It provides a network proxy system that tunnels traffic through these barriers.
